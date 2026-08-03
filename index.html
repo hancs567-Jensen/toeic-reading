@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOEIC 閱讀測驗練習站</title>
+<style>
+  :root{
+    --ink:#1c2b3a;
+    --paper:#faf7f0;
+    --paper2:#ffffff;
+    --line:#e2d9c8;
+    --accent:#a8532f;
+    --accent2:#3d6b5c;
+    --muted:#6b7280;
+    --good:#2f7a4f;
+    --bad:#b3402d;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: "Noto Serif TC","Georgia",serif;
+    background:var(--paper);
+    color:var(--ink);
+    line-height:1.7;
+  }
+  header{
+    background:var(--ink);
+    color:var(--paper);
+    padding:18px 20px 16px;
+    text-align:center;
+    position:sticky;
+    top:0;
+    z-index:20;
+  }
+  header h1{
+    margin:0 0 4px;
+    font-size:1.35rem;
+    letter-spacing:1px;
+    font-weight:600;
+  }
+  header p{margin:0;font-size:.78rem;opacity:.7;font-family:sans-serif;}
+  nav.tabs{
+    display:flex;
+    justify-content:center;
+    gap:8px;
+    margin-top:12px;
+    flex-wrap:wrap;
+  }
+  nav.tabs button{
+    font-family:sans-serif;
+    background:transparent;
+    border:1px solid rgba(250,247,240,.35);
+    color:var(--paper);
+    padding:6px 14px;
+    border-radius:20px;
+    cursor:pointer;
+    font-size:.82rem;
+    transition:.15s;
+  }
+  nav.tabs button.active,nav.tabs button:hover{
+    background:var(--accent);
+    border-color:var(--accent);
+  }
+  nav.tabs.test-select button.active{background:var(--accent2);border-color:var(--accent2);}
+  main{
+    max-width:920px;
+    margin:0 auto;
+    padding:24px 16px 120px;
+  }
+  .section-title{
+    font-size:1.15rem;
+    margin:34px 0 6px;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:6px;
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+  .section-title .score{
+    font-family:sans-serif;
+    font-size:.8rem;
+    color:var(--muted);
+  }
+  .directions{
+    font-size:.85rem;
+    color:var(--muted);
+    font-family:sans-serif;
+    margin-bottom:18px;
+    background:var(--paper2);
+    border-left:3px solid var(--accent2);
+    padding:10px 14px;
+    border-radius:2px;
+  }
+  .card{
+    background:var(--paper2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:16px 18px;
+    margin-bottom:16px;
+  }
+  .qnum{
+    font-weight:700;
+    color:var(--accent);
+    margin-right:4px;
+    font-family:sans-serif;
+  }
+  .sentence{font-size:1.02rem;}
+  .choices{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px;
+    margin-top:12px;
+  }
+  @media(max-width:520px){.choices{grid-template-columns:1fr;}}
+  .choice-btn{
+    font-family:sans-serif;
+    text-align:left;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:5px;
+    padding:8px 10px;
+    cursor:pointer;
+    font-size:.88rem;
+    color:var(--ink);
+  }
+  .choice-btn:hover{border-color:var(--accent);}
+  .choice-btn.correct{background:#e4f3e8;border-color:var(--good);color:var(--good);font-weight:600;}
+  .choice-btn.wrong{background:#fbe7e3;border-color:var(--bad);color:var(--bad);}
+  .choice-btn[disabled]{cursor:default;}
+  .explain{
+    margin-top:10px;
+    font-family:sans-serif;
+    font-size:.82rem;
+    color:var(--muted);
+    display:none;
+    border-top:1px dashed var(--line);
+    padding-top:8px;
+  }
+  .passage-box{
+    background:var(--paper2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:20px 22px;
+    margin-bottom:6px;
+  }
+  .passage-title{
+    font-family:sans-serif;
+    font-size:.78rem;
+    color:var(--muted);
+    text-transform:uppercase;
+    letter-spacing:.5px;
+    margin-bottom:8px;
+  }
+  .passage-text{font-size:1rem;white-space:pre-line;}
+  .passage-text + .passage-text{margin-top:14px;padding-top:14px;border-top:1px dashed var(--line);}
+  .blank-tag{
+    font-weight:700;
+    color:#fff;
+    background:var(--accent);
+    border-radius:3px;
+    padding:0 5px;
+    font-size:.8rem;
+    font-family:sans-serif;
+  }
+  .toolbar{
+    display:flex;
+    gap:10px;
+    margin:10px 0 18px;
+    flex-wrap:wrap;
+  }
+  .tbtn{
+    font-family:sans-serif;
+    font-size:.8rem;
+    background:var(--accent2);
+    color:#fff;
+    border:none;
+    border-radius:16px;
+    padding:6px 14px;
+    cursor:pointer;
+  }
+  .tbtn.secondary{background:transparent;color:var(--accent2);border:1px solid var(--accent2);}
+  .zh-block{
+    display:none;
+    background:#f4efe2;
+    border-left:3px solid var(--accent);
+    padding:14px 16px;
+    margin:10px 0 18px;
+    font-size:.92rem;
+    border-radius:2px;
+    color:#3a2f22;
+  }
+  .vocab{
+    color:var(--accent);
+    border-bottom:1.5px dotted var(--accent);
+    cursor:pointer;
+    font-weight:600;
+  }
+  .vocab:hover{background:#f6e6d8;}
+  .sub-q{margin-top:14px;}
+  .sub-q + .sub-q{border-top:1px dashed var(--line);padding-top:14px;}
+
+  #vocabPanel{
+    position:fixed;
+    right:0;
+    top:0;
+    height:100%;
+    width:320px;
+    max-width:88vw;
+    background:var(--ink);
+    color:var(--paper);
+    transform:translateX(100%);
+    transition:transform .25s ease;
+    z-index:100;
+    padding:22px 20px;
+    font-family:sans-serif;
+    overflow-y:auto;
+    box-shadow:-6px 0 24px rgba(0,0,0,.25);
+  }
+  #vocabPanel.open{transform:translateX(0);}
+  #vocabPanel .close{
+    background:none;border:none;color:var(--paper);
+    font-size:1.3rem;cursor:pointer;float:right;
+    opacity:.7;
+  }
+  #vocabPanel h3{
+    font-family:"Noto Serif TC",serif;
+    font-size:1.3rem;
+    margin:20px 0 2px;
+    color:#f4d9c6;
+  }
+  #vocabPanel .pos{font-size:.78rem;opacity:.65;margin-bottom:10px;}
+  #vocabPanel .zh{font-size:1.05rem;margin-bottom:16px;}
+  #vocabPanel .ex-en{font-size:.9rem;line-height:1.6;margin-bottom:4px;}
+  #vocabPanel .ex-zh{font-size:.88rem;opacity:.75;line-height:1.6;}
+  #vocabOverlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.25);
+    display:none;z-index:90;
+  }
+  #vocabOverlay.open{display:block;}
+  footer{
+    text-align:center;
+    font-family:sans-serif;
+    font-size:.75rem;
+    color:var(--muted);
+    padding:30px 10px 50px;
+  }
+  .empty-vocab{opacity:.6;font-size:.85rem;margin-top:20px;}
+  .pattern-card{
+    background:var(--paper2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:14px 18px;
+    margin-bottom:12px;
+  }
+  .pattern-en{font-weight:700;color:var(--accent);font-size:1.02rem;}
+  .pattern-zh{font-family:sans-serif;font-size:.85rem;color:var(--muted);margin:2px 0 8px;}
+  .pattern-ex{font-size:.95rem;}
+  .pattern-exzh{font-family:sans-serif;font-size:.85rem;color:var(--muted);margin-top:2px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>TOEIC 閱讀測驗練習站</h1>
+  <p>點擊文章中橘色底線的單字可查看中文解釋與例句・按鈕可顯示整段中文翻譯</p>
+  <nav class="tabs test-select" id="testTabs">
+    <button data-test="test1" class="active">Test 1（101–200）</button>
+    <button data-test="test2">Test 2（101–200）</button>
+    <button data-test="patterns">常用句型</button>
+  </nav>
+  <nav class="tabs" id="partTabs">
+    <button data-part="p5" class="active">Part 5</button>
+    <button data-part="p6">Part 6</button>
+    <button data-part="p7">Part 7</button>
+  </nav>
+</header>
+
+<main id="main"></main>
+
+<footer>Test 1 · Test 2 各 101–200 題（取自使用者提供之閱讀測驗文字檔／圖檔）</footer>
+
+<div id="vocabOverlay"></div>
+<div id="vocabPanel">
+  <button class="close" onclick="closeVocab()">✕</button>
+  <div id="vocabContent"><div class="empty-vocab">點擊文章中橘色底線的單字，這裡會顯示中文解釋與例句。</div></div>
+</div>
+
+<script>
+/* ============ VOCAB DICTIONARY ============ */
+const VOCAB = {
+  "endorse": {pos:"v.", zh:"代言；背書、支持", ex:"Companies often pay celebrities to endorse their products.", exZh:"公司經常付錢請名人代言他們的產品。"},
+  "renovate":{pos:"v.", zh:"整修；翻新", ex:"The old theater will be renovated next year.", exZh:"這棟老劇院明年將進行整修。"},
+  "renovated":{pos:"v.(過去分詞)", zh:"整修；翻新（的）", ex:"The space is going to be renovated this spring.", exZh:"這個空間將於今年春天整修。"},
+  "renovations":{pos:"n.", zh:"整修工程", ex:"Renovations to the space are nearly complete.", exZh:"該空間的整修工程已接近完工。"},
+  "spokesperson":{pos:"n.", zh:"發言人", ex:"The spokesperson confirmed the change during a press conference.", exZh:"該發言人在記者會上證實了這項變動。"},
+  "rumors":{pos:"n.(複)", zh:"傳言；謠言", ex:"Rumors of a change spread quickly through the office.", exZh:"變動的傳言迅速在辦公室裡傳開。"},
+  "consultant":{pos:"n.", zh:"顧問", ex:"She works as a consultant for several tech firms.", exZh:"她為多家科技公司擔任顧問。"},
+  "restoration":{pos:"n.", zh:"修復；復原", ex:"The restoration of the old ship took three years.", exZh:"這艘老船的修復工作花了三年時間。"},
+  "delegate":{pos:"v.", zh:"委派；授權", ex:"Managers should learn to delegate tasks to their team.", exZh:"主管應該學會將任務委派給團隊成員。"},
+  "subcontractor":{pos:"n.", zh:"分包商", ex:"The main contractor hired a subcontractor for the electrical work.", exZh:"總承包商聘請了一家分包商負責電力工程。"},
+  "qualified":{pos:"adj.", zh:"合格的；具資格的", ex:"Only qualified applicants will be interviewed.", exZh:"只有合格的應徵者才會被安排面試。"},
+  "qualification":{pos:"n.", zh:"資格", ex:"He confirmed Mr. Deparis's qualification.", exZh:"他確認了德帕里先生的資格。"},
+  "defective":{pos:"adj.", zh:"有瑕疵的", ex:"Defective products can be exchanged within 30 days.", exZh:"瑕疵商品可在30天內更換。"},
+  "refund":{pos:"n./v.", zh:"退款", ex:"Customers can request a full refund with a receipt.", exZh:"顧客憑收據可要求全額退款。"},
+  "merchandise":{pos:"n.", zh:"商品", ex:"The store discounted all summer merchandise.", exZh:"該店對所有夏季商品打折。"},
+  "evaporation":{pos:"n.", zh:"蒸發", ex:"The system measures the rate of evaporation in the soil.", exZh:"該系統會測量土壤的蒸發速率。"},
+  "irrigation":{pos:"n.", zh:"灌溉", ex:"Smart irrigation saves water on farms.", exZh:"智慧灌溉能為農場節省用水。"},
+  "anticipate":{pos:"v.", zh:"預期；預估", ex:"Developers anticipate strong sales next quarter.", exZh:"開發商預期下一季銷售會很強勁。"},
+  "monitoring":{pos:"v.(動名詞)", zh:"監測；監控", ex:"The system continuously monitors soil conditions.", exZh:"該系統持續監測土壤狀況。"},
+  "ensures":{pos:"v.", zh:"確保", ex:"This step ensures the crops are not overwatered.", exZh:"這個步驟能確保作物不會被過度澆灌。"},
+  "tentative":{pos:"adj.", zh:"暫定的", ex:"Here is my tentative schedule for Monday.", exZh:"這是我週一的暫定行程。"},
+  "forecast":{pos:"n./v.", zh:"預報", ex:"Rain has been forecast for today.", exZh:"今天預報會下雨。"},
+  "priority":{pos:"n.", zh:"優先(權)", ex:"Club members can purchase priority tickets.", exZh:"俱樂部會員可以優先購票。"},
+  "garment":{pos:"n.", zh:"成衣；服裝", ex:"The city boasts four garment factories.", exZh:"這座城市擁有四座成衣工廠。"},
+  "showcase":{pos:"v.", zh:"展示", ex:"Designers showcase their collections online.", exZh:"設計師在線上展示他們的作品系列。"},
+  "visibility":{pos:"n.", zh:"能見度；曝光度", ex:"African designers are finally gaining visibility.", exZh:"非洲設計師終於獲得了能見度。"},
+  "capacity":{pos:"n.", zh:"產能；容量", ex:"Improving manufacturing capacity helps exports.", exZh:"提升製造產能有助於出口。"},
+  "textile":{pos:"n.", zh:"紡織品；紡織業", ex:"Africa has a strong textile sector.", exZh:"非洲擁有堅實的紡織產業。"},
+  "boasts":{pos:"v.", zh:"擁有（值得自豪的事物）", ex:"The city boasts four garment factories.", exZh:"該市擁有四座成衣工廠。"},
+  "expired":{pos:"v.", zh:"到期", ex:"The sponsorship agreement expired last season.", exZh:"贊助合約在上一季到期。"},
+  "sponsorship":{pos:"n.", zh:"贊助", ex:"Thredquest signed a new sponsorship agreement.", exZh:"Thredquest簽署了新的贊助協議。"},
+  "negotiate":{pos:"v.", zh:"協商；談判", ex:"The coach helped negotiate the contract terms.", exZh:"教練協助協商合約條款。"},
+  "negotiator":{pos:"n.", zh:"談判者", ex:"She earned a reputation as a skilled negotiator.", exZh:"她因為出色的談判能力而建立起名聲。"},
+  "prevention":{pos:"n.", zh:"預防", ex:"He advised teams on injury prevention.", exZh:"他為球隊提供傷害預防的建議。"},
+  "budget":{pos:"n.", zh:"預算", ex:"Travel costs are part of the team's budget.", exZh:"交通費用是球隊預算的一部分。"},
+  "hires":{pos:"v.", zh:"雇用", ex:"The company only hires experienced staff.", exZh:"該公司只雇用有經驗的員工。"},
+  "discount":{pos:"n./v.", zh:"折扣", ex:"The landlord offered a discount on rent.", exZh:"房東提供了租金折扣。"},
+  "thorough":{pos:"adj.", zh:"徹底的；仔細的", ex:"Every necklace gets a thorough quality check.", exZh:"每條項鍊都會經過徹底的品質檢查。"},
+  "applause":{pos:"n.", zh:"掌聲", ex:"The audience should hold its applause until the end.", exZh:"觀眾應該在結束前先不要鼓掌。"},
+  "customary":{pos:"adj.", zh:"習慣上的；慣例的", ex:"It is customary to arrive early for interviews.", exZh:"提早到場面試是一種慣例。"},
+  "predictions":{pos:"n.", zh:"預測", ex:"The predictions turned out to be wrong.", exZh:"這些預測後來證實是錯的。"},
+  "competition":{pos:"n.", zh:"競爭；競爭對手", ex:"Cheaper competition entered the market.", exZh:"更便宜的競爭對手進入了市場。"},
+  "prohibited":{pos:"v.(被動)", zh:"被禁止", ex:"Parking will be prohibited on Cole Avenue.", exZh:"Cole大道將禁止停車。"},
+  "sufficiently":{pos:"adv.", zh:"充分地", ex:"He was sufficiently prepared for the interview.", exZh:"他為這場面試做了充分的準備。"},
+  "sincerely":{pos:"adv.", zh:"誠摯地", ex:"She sincerely thanked her mentor.", exZh:"她誠摯地感謝她的導師。"},
+  "lease":{pos:"v./n.", zh:"租賃", ex:"The firm decided to lease the office space.", exZh:"該公司決定租賃這間辦公室。"},
+  "specimens":{pos:"n.", zh:"標本", ex:"The archive has almost 300,000 plant specimens.", exZh:"這個典藏館有將近30萬件植物標本。"},
+  "shutdown":{pos:"n.", zh:"停工；關閉", ex:"The factory undergoes a yearly shutdown for safety checks.", exZh:"這間工廠每年都會停工進行安全檢查。"},
+  "evaluated":{pos:"v.(被動)", zh:"被評估", ex:"The factory will be evaluated for efficiency.", exZh:"這間工廠將接受效率評估。"},
+  "hearing":{pos:"n.", zh:"聽證會", ex:"A hearing will be scheduled to review the bridge plans.", exZh:"將安排一場聽證會來審查橋樑計畫。"},
+  "reception":{pos:"n.", zh:"招待會", ex:"The convention will begin with an informal reception.", exZh:"大會將以一場非正式的招待會揭開序幕。"},
+  "reliability":{pos:"n.", zh:"可靠性", ex:"Reliability and cost both factored into the decision.", exZh:"可靠性與成本都是決策考量因素。"},
+  "commuters":{pos:"n.", zh:"通勤者", ex:"Commuters welcomed the news about the upgrade.", exZh:"通勤族對這項升級消息表示歡迎。"},
+  "amplifiers":{pos:"n.", zh:"擴大機", ex:"Worn-out amplifiers will be replaced.", exZh:"老舊的擴大機將被更換。"},
+  "facility":{pos:"n.", zh:"設施；廠房", ex:"The new facility will open in Hanover.", exZh:"新廠房將在漢諾威開幕。"},
+  "recruiters":{pos:"n.", zh:"招募人員", ex:"Speak with our recruiters at the event.", exZh:"在活動中與我們的招募人員洽談。"},
+  "exchanged":{pos:"v.(被動)", zh:"被交換；更換", ex:"Defective items may be exchanged for the same item.", exZh:"瑕疵商品可更換為同款商品。"},
+  "components":{pos:"n.", zh:"組件；零件", ex:"All components must be included in the return.", exZh:"退貨時所有配件都必須齊全。"},
+  "drenched":{pos:"adj./v.", zh:"濕透的", ex:"He didn't want the tractor to get drenched by rain.", exZh:"他不希望拖曳機被雨淋濕。"},
+  "worn-out":{pos:"adj.", zh:"老舊耗損的", ex:"Worn-out speakers will be replaced.", exZh:"老舊的喇叭將被更換。"},
+  "reliable":{pos:"adj.", zh:"可靠的", ex:"New, more reliable devices will be installed.", exZh:"將安裝更新、更可靠的設備。"},
+  "founder":{pos:"n.", zh:"創辦人", ex:"Enzo Moreau, Founder of the Sailboat Factory.", exZh:"創辦人安佐．莫羅。"},
+  "passion":{pos:"n.", zh:"熱情", ex:"Sailing is his true passion.", exZh:"航海是他真正的熱情所在。"},
+  "adolescents":{pos:"n.", zh:"青少年", ex:"K-pop videos are popular among adolescents worldwide.", exZh:"韓流音樂影片在全球青少年間很受歡迎。"},
+  "emissions":{pos:"n.", zh:"排放（物）", ex:"The company helps reduce carbon dioxide emissions.", exZh:"該公司協助減少二氧化碳排放。"},
+  "summit":{pos:"n.", zh:"高峰會", ex:"The summit will be held at the Trade Tower.", exZh:"高峰會將在貿易大樓舉行。"},
+  "subscription":{pos:"n.", zh:"訂閱", ex:"They added a digital subscription option.", exZh:"他們新增了數位訂閱選項。"},
+  "clearance":{pos:"n.", zh:"清倉；出清", ex:"Clearance items cannot be purchased with credits.", exZh:"清倉商品不得使用點數購買。"},
+  "credits":{pos:"n.", zh:"點數；折抵額", ex:"You can apply your reward credits at checkout.", exZh:"您可以在結帳時套用回饋點數。"},
+  "coupon":{pos:"n.", zh:"優惠券", ex:"Print the coupon and scan it at checkout.", exZh:"列印優惠券並在結帳時掃描。"},
+  "formula":{pos:"n.", zh:"模式；配方", ex:"Tradition and wearability combine in this formula.", exZh:"傳統與實穿性結合成這樣的模式。"},
+  "manufacturing":{pos:"n.", zh:"製造（業）", ex:"Cities are improving their manufacturing capacity.", exZh:"各城市正提升製造產能。"},
+  "consecutive":{pos:"adj.", zh:"連續的", ex:"Travel exceeding ten consecutive business days needs extra approval.", exZh:"超過連續十個工作天的出差需要額外核准。"},
+  "overlap":{pos:"n./v.", zh:"重疊", ex:"There will likely be a few days of overlap in the travel dates.", exZh:"出差日期可能會有幾天重疊。"},
+  "workshop":{pos:"n.", zh:"工作坊；研習營", ex:"She has just been invited to lead several workshops in Seoul.", exZh:"她剛被邀請到首爾主持幾場工作坊。"},
+  "symposium":{pos:"n.", zh:"研討會", ex:"He will attend a symposium on modern city structure.", exZh:"他將出席一場關於現代城市結構的研討會。"},
+  "exposition":{pos:"n.", zh:"博覽會；展覽", ex:"She will present at an architecture exposition in Ottawa.", exZh:"她將在渥太華的建築博覽會上發表演說。"},
+  "unanimous":{pos:"adj.", zh:"一致同意的", ex:"She was the board's unanimous choice for CEO.", exZh:"她獲董事會一致同意，成為執行長人選。"},
+  "preside":{pos:"v.", zh:"主持；主導", ex:"She presided over the merger of two companies.", exZh:"她主導了兩家公司的合併案。"},
+  "merger":{pos:"n.", zh:"合併", ex:"The merger created one of the largest firms in the industry.", exZh:"這起合併案打造出業界最大的公司之一。"},
+  "reputation":{pos:"n.", zh:"名聲；聲譽", ex:"She earned a reputation as a skilled negotiator.", exZh:"她因為出色的談判能力而建立起名聲。"},
+  "foresee":{pos:"v.", zh:"預見；預料", ex:"We do not foresee new policies regarding promotions.", exZh:"我們預料不會有新的升遷政策。"},
+  "revise":{pos:"v.", zh:"修訂；修改", ex:"She may elect to revise both assignments and policies.", exZh:"她可能會選擇修訂工作分配與政策。"},
+  "luncheon":{pos:"n.", zh:"午宴", ex:"Ms. Silva will be welcomed with a luncheon in her honor.", exZh:"公司將為西爾瓦女士舉辦一場午宴以表歡迎。"},
+  "colleague":{pos:"n.", zh:"同事", ex:"I would like a few of my colleagues to join us.", exZh:"我想邀請幾位同事一起加入。"},
+  "leadership":{pos:"n.", zh:"領導（能力/職位）", ex:"We do not anticipate changes in departmental leadership.", exZh:"我們預料部門的領導層不會有變動。"},
+  "enquiry":{pos:"n.", zh:"詢問（＝inquiry）", ex:"Thank you for your enquiry.", exZh:"感謝您的詢問。"},
+  "estimate":{pos:"n./v.", zh:"估價；估計", ex:"This is a rough estimate based on the information you provided.", exZh:"這是根據您提供的資訊所做的粗略估價。"},
+  "perimeter":{pos:"n.", zh:"周長；周邊範圍", ex:"Please provide the perimeter of the area you need to enclose.", exZh:"請提供您需要圍起範圍的周長。"},
+  "gated":{pos:"adj.", zh:"設有出入口的", ex:"The number of gated entrances needed must be specified.", exZh:"需要說明所需的出入口數量。"},
+  "rush order":{pos:"n.片語", zh:"急件訂單", ex:"A rush order requires less than three weeks' notice.", exZh:"急件訂單指通知時間少於三週的訂單。"},
+  "fastened":{pos:"v.", zh:"被固定；被繫緊", ex:"The curtain would be wrapped around and fastened to the fence.", exZh:"這片布幕會被包覆並固定在圍籬上。"},
+  "pedestrian":{pos:"n./adj.", zh:"行人（的）", ex:"The curtain hides the site from the view of pedestrians.", exZh:"這片布幕能遮擋工地，避免行人看見。"},
+  "podiums":{pos:"n.", zh:"講台", ex:"All rooms have podiums, microphones, and screens.", exZh:"所有房間都配有講台、麥克風和螢幕。"},
+  "refreshment":{pos:"n.", zh:"茶點；小點心", ex:"Refreshment service will be set up in the lobby.", exZh:"茶點服務將設置在大廳。"},
+  "participants":{pos:"n.", zh:"參加者", ex:"More than 90 conference participants signed up for the presentation.", exZh:"超過90位與會者報名參加這場演講。"},
+  "popularity":{pos:"n.", zh:"受歡迎程度；人氣", ex:"We have been upgraded to a larger room due to the popularity of our presentation.", exZh:"因為我們的演講太受歡迎，房間被升級成更大的場地。"},
+  "agenda":{pos:"n.", zh:"議程", ex:"Let's finalize the agenda and the handouts.", exZh:"我們來把議程和講義定案吧。"},
+  "handouts":{pos:"n.", zh:"講義；資料", ex:"We need to choose the handouts to distribute.", exZh:"我們需要選定要發放的講義。"},
+  "distribute":{pos:"v.", zh:"分發；發放", ex:"The handouts will be distributed at the workshop.", exZh:"講義將在工作坊中發放。"},
+  "reimbursed":{pos:"v.(被動)", zh:"被報銷；被退還費用", ex:"The software calculates the total to be reimbursed.", exZh:"這套軟體會計算應報銷的總金額。"},
+  "reimbursement":{pos:"n.", zh:"費用報銷", ex:"These steps will enable us to quickly issue your reimbursement payment.", exZh:"這些步驟能讓我們盡快撥發您的報銷款項。"},
+  "capability":{pos:"n.", zh:"能力；功能", ex:"The software has a special capability to calculate totals automatically.", exZh:"這套軟體有自動計算總額的特殊功能。"},
+  "expense report":{pos:"n.片語", zh:"費用報告", ex:"New procedures regarding business trip expense reports will apply.", exZh:"新的出差費用報告規定即將實施。"},
+  "audiovisual":{pos:"adj.", zh:"視聽的", ex:"Should I get a projector from the Audiovisual Department?", exZh:"我需要向視聽部門借投影機嗎？"},
+  "accommodate":{pos:"v.", zh:"容納", ex:"His office can accommodate a lot of people.", exZh:"他的辦公室能容納很多人。"},
+  "girder":{pos:"n.", zh:"大樑；桁架", ex:"The bridge's main span material is steel girder.", exZh:"這座橋的主跨結構材料是鋼樑。"},
+  "deteriorated":{pos:"adj./v.", zh:"劣化的；惡化", ex:"A rating of 2 means the part is deteriorated and may fail soon.", exZh:"評級2代表該部位已劣化，可能很快失效。"},
+  "inspection":{pos:"n.", zh:"檢查；巡查", ex:"Ms. Tulio most likely performed an inspection.", exZh:"圖利歐女士很可能是進行了一次檢查。"},
+  "drainage":{pos:"n.", zh:"排水（系統）", ex:"The drainage features show minor wear.", exZh:"排水設施顯示輕微磨損。"},
+  "barrier":{pos:"n.", zh:"護欄；屏障", ex:"The safety barriers are in new condition.", exZh:"安全護欄狀況如新。"},
+  "harvest":{pos:"n./v.", zh:"收成", ex:"Above-average temperatures caused fields to yield less wheat.", exZh:"高於平均的氣溫使田地小麥收成減少。"},
+  "yield":{pos:"v./n.", zh:"生產；產出", ex:"Fields yielded sharply less wheat overall.", exZh:"田地整體的小麥產量大幅減少。"},
+  "adverse":{pos:"adj.", zh:"不利的", ex:"Despite the adverse weather conditions, the crop did well.", exZh:"儘管天氣條件不利，這項作物的表現仍然良好。"},
+  "distributors":{pos:"n.", zh:"經銷商", ex:"Alma has been selling its seed through Argentinian distributors.", exZh:"Alma一直透過阿根廷的經銷商銷售種子。"},
+  "catch on":{pos:"片語動詞", zh:"開始流行；受到歡迎", ex:"The product was slow to catch on until now.", exZh:"這項產品直到現在才開始受到市場青睞。"},
+  "fortunes":{pos:"n.", zh:"境遇；命運（常指事業興衰）", ex:"Investors have taken notice of the company's rapidly improving fortunes.", exZh:"投資人已注意到該公司迅速好轉的營運狀況。"},
+  "aspiring":{pos:"adj.", zh:"有志於…的；未來的", ex:"The blog is useful for aspiring architects.", exZh:"這個部落格對有志成為建築師的人很有幫助。"},
+  "guest post":{pos:"n.片語", zh:"客座文章", ex:"Would you allow me to contribute a guest post to your site?", exZh:"是否能讓我在您的網站上發表一篇客座文章？"},
+  "mentee":{pos:"n.", zh:"受輔導者", ex:"Mentees will be assigned to a mentor based on their work assignment.", exZh:"受輔導者將依工作內容被分配給一位導師。"},
+  "mentor":{pos:"n./v.", zh:"導師；輔導", ex:"She was intrigued by the idea of mentoring a less experienced employee.", exZh:"她對輔導資淺員工這個想法感到很有興趣。"},
+  "veteran":{pos:"n.", zh:"資深人員；老手", ex:"Junior employees will be matched with long-term company veterans.", exZh:"資淺員工將與資深員工配對。"},
+  "pointers":{pos:"n.", zh:"建議；訣竅", ex:"She needed pointers on how to make better sales pitches.", exZh:"她需要一些如何做出更好銷售簡報的訣竅。"},
+  "pitch":{pos:"n.", zh:"（銷售）簡報；提案", ex:"Her sales pitches have improved a lot.", exZh:"她的銷售簡報進步很多。"},
+  "intrigued":{pos:"adj.", zh:"感到興趣的", ex:"She was intrigued when a director approached her about mentoring.", exZh:"當主管找她討論擔任導師時，她感到很有興趣。"},
+  "calibrate":{pos:"v.", zh:"校準", ex:"He supervised the calibration of the equipment.", exZh:"他監督了設備的校準作業。"},
+  "specifications":{pos:"n.", zh:"規格", ex:"The paint did not meet our specifications.", exZh:"這批漆料不符合我們的規格要求。"},
+  "durability":{pos:"n.", zh:"耐用度", ex:"Durability tests check weight, resistance, and material quality.", exZh:"耐用度測試會檢查重量、耐受度與材質品質。"},
+  "expedited":{pos:"adj.", zh:"加急的；快速處理的", ex:"Expedited delivery would be available for some customers.", exZh:"部分客戶可享有加急出貨服務。"},
+  "invest":{pos:"v.", zh:"投資", ex:"The company pledged to invest in additional equipment.", exZh:"該公司承諾投資更多設備。"},
+  "contemplating":{pos:"v.(動名詞)", zh:"考慮；思考", ex:"We've been contemplating a large-scale equipment purchase.", exZh:"我們一直在考慮大規模採購設備。"},
+  "pledged":{pos:"v.", zh:"承諾；保證", ex:"The company pledged to invest in additional equipment.", exZh:"該公司承諾投資更多設備。"},
+  "skilled":{pos:"adj.", zh:"熟練的；有技能的", ex:"We will put many skilled applicants to work immediately.", exZh:"我們將立即讓許多具備技能的應徵者上工。"},
+  "labour pool":{pos:"n.片語", zh:"勞動力來源", ex:"We have the space and an available labour pool.", exZh:"我們有場地，也有可運用的勞動力。"},
+  "secured":{pos:"v.", zh:"取得；確保", ex:"The company has secured a contract to produce office chairs.", exZh:"該公司已取得生產辦公椅的合約。"},
+  "royalty":{pos:"n.", zh:"版稅", ex:"Enclosed please find your royalty payment.", exZh:"隨函附上您的版稅款項。"},
+  "loyal":{pos:"adj.", zh:"忠誠的", ex:"Duggan's has a loyal customer base.", exZh:"Duggan's擁有一群忠實顧客。"},
+  "dominant":{pos:"adj.", zh:"主導的；佔優勢的", ex:"It is South Africa's most dominant supermarket chain.", exZh:"它是南非最具主導地位的連鎖超市。"},
+  "tenant":{pos:"n.", zh:"承租戶", ex:"Duggan's is the main tenant in each shopping complex.", exZh:"Duggan's是每個購物中心的主要承租戶。"},
+  "inventory":{pos:"n.", zh:"存貨；庫存", ex:"Duggan's tailors its product inventory to the local culture.", exZh:"Duggan's會依當地文化調整其商品庫存。"},
+  "innovative":{pos:"adj.", zh:"創新的", ex:"AT Mart needs to be more innovative to compete.", exZh:"AT Mart需要更具創新力才能與對手競爭。"},
+  "name recognition":{pos:"n.片語", zh:"知名度", ex:"AT Mart may have much wider name recognition.", exZh:"AT Mart可能擁有更高的知名度。"},
+  "exorbitant":{pos:"adj.", zh:"過高的；漫天要價的", ex:"They were not willing to pay exorbitant leasing fees.", exZh:"他們不願意支付過高的租賃費用。"},
+  "morale":{pos:"n.", zh:"士氣", ex:"The outing is always great for morale.", exZh:"這場員工出遊總能提振士氣。"},
+  "outing":{pos:"n.", zh:"（團體）出遊活動", ex:"The office manager arranges our annual company outing.", exZh:"辦公室經理負責安排我們每年的員工出遊。"},
+  "fund-raiser":{pos:"n.", zh:"募款活動", ex:"Group tickets are perfect for charity fund-raisers.", exZh:"團體票很適合用於慈善募款活動。"},
+  "scoreboard":{pos:"n.", zh:"計分板", ex:"Your group's name will be displayed on the scoreboard.", exZh:"您團體的名稱將顯示在計分板上。"},
+  "settle in":{pos:"片語動詞", zh:"安頓；適應新環境", ex:"I hope you are settling in well.", exZh:"希望你已經適應得不錯。"},
+  "opposing team":{pos:"n.片語", zh:"對手隊伍", ex:"Check the schedule to see the opposing team.", exZh:"請查看賽程表以確認對手隊伍。"},
+  "chairperson":{pos:"n.", zh:"主席", ex:"Felix Pang is the Chairperson of the Small Business Challenge Committee.", exZh:"費利克斯．彭是小型企業挑戰賽委員會的主席。"},
+  "nominated":{pos:"v.(被動)", zh:"被提名", ex:"You have been nominated as a finalist for the competition.", exZh:"您已被提名為本次競賽的決賽入圍者。"},
+  "finalist":{pos:"n.", zh:"決賽入圍者", ex:"Three finalists will give live presentations.", exZh:"三位決賽入圍者將進行現場簡報。"},
+  "entrepreneurs":{pos:"n.", zh:"創業者", ex:"The competition highlights products launched by young entrepreneurs.", exZh:"該競賽旨在表揚年輕創業者推出的產品。"},
+  "charitable":{pos:"adj.", zh:"慈善的", ex:"The app matches charitable organizations with volunteers.", exZh:"這款應用程式能媒合慈善機構與志工。"},
+  "panel of judges":{pos:"n.片語", zh:"評審團", ex:"The presentation will be given before a panel of expert judges.", exZh:"這場簡報將在專家評審團面前進行。"},
+  "grants":{pos:"n.", zh:"獎助金", ex:"Winners will receive one-time grants to invest in their businesses.", exZh:"得獎者將獲得一次性獎助金以投資自己的事業。"},
+  "consent form":{pos:"n.片語", zh:"同意書", ex:"You will need to sign a consent form.", exZh:"您需要簽署一份同意書。"},
+  "promotional":{pos:"adj.", zh:"宣傳的", ex:"Your photo may be used in promotional materials.", exZh:"您的照片可能會被用於宣傳資料中。"},
+  "deadline":{pos:"n.", zh:"截止日期", ex:"The deadline for submission is 10 March.", exZh:"送件截止日期為3月10日。"},
+  "submission":{pos:"n.", zh:"送件；提交", ex:"The deadline for submission of these materials is 10 March.", exZh:"這些資料的送件截止日期為3月10日。"},
+  "illustrates":{pos:"v.", zh:"闡明；說明", ex:"The video clearly illustrates the use of your application.", exZh:"這支影片清楚說明了您應用程式的使用方式。"},
+  "matching":{pos:"v.(動名詞)", zh:"媒合；配對", ex:"The app provides a means of matching organizations with volunteers.", exZh:"這款應用程式提供了媒合機構與志工的方式。"},
+  "trial run":{pos:"n.片語", zh:"試產；試營運", ex:"The production trial-run schedule shows several key steps.", exZh:"生產試產排程列出了幾個關鍵步驟。"},
+  "assembly":{pos:"n.", zh:"組裝", ex:"Production and assembly of parts took place on Tuesday.", exZh:"零件的生產與組裝於週二進行。"},
+  "resistance":{pos:"n.", zh:"耐受度；抵抗力", ex:"Durability tests check weight, resistance, and material quality.", exZh:"耐用度測試會檢查重量、耐受度與材質品質。"},
+  "structurally":{pos:"adv.", zh:"結構上地", ex:"The bridge is overall structurally sound.", exZh:"這座橋整體結構良好。"}
+};
+
+/* ============ SENTENCE PATTERNS ============ */
+const PATTERNS = [
+ {en:"strive to V", zh:"力求、努力做到…", ex:"PGD Bank strives to provide the highest levels of client security and service.", exZh:"PGD銀行致力於提供最高水準的客戶安全與服務。"},
+ {en:"be entitled to N", zh:"有權享有…", ex:"All Two Swan Press authors are entitled to an author discount of 40 percent.", exZh:"所有Two Swan Press的作者都有權享有四折的作者優惠。"},
+ {en:"in the meantime", zh:"在此期間、同時", ex:"In the meantime, our other two regional branches will maintain normal business hours.", exZh:"在此期間，我們其他兩家分行將維持正常營業時間。"},
+ {en:"yet to be + p.p.", zh:"尚未被…", ex:"The restaurant's name is yet to be announced.", exZh:"餐廳的新名稱目前尚未公布。"},
+ {en:"be responsible for N", zh:"對…負責、造成…", ex:"Inclement weather was largely responsible for the low turnout.", exZh:"惡劣天氣是出席人數低落的主要原因。"},
+ {en:"despite + N / Ving", zh:"儘管…", ex:"Despite initial criticism over the size of the venue, the show was a great success.", exZh:"儘管一開始有人批評場地大小，這場秀依然大獲成功。"},
+ {en:"as a result", zh:"因此、結果是", ex:"As a result, I am particularly eager to hear your ideas about the terminal.", exZh:"因此，我特別想聽聽您對航廈的想法。"},
+ {en:"in order to V", zh:"為了…", ex:"Employees must have a valid ID card in order to enter the building.", exZh:"員工必須持有效識別證才能進入大樓。"},
+ {en:"be scheduled to V", zh:"預定要…", ex:"Your purchase is currently scheduled to ship on Monday.", exZh:"您的訂單目前預定於週一出貨。"},
+ {en:"be capable of Ving", zh:"有能力做到…", ex:"The factory is capable of manufacturing the chairs per our design specifications.", exZh:"這間工廠有能力依照我們的設計規格製造這款椅子。"},
+ {en:"not only... but also...", zh:"不僅…而且…", ex:"This applies not only to online services but also to our brick-and-mortar locations.", exZh:"這不僅適用於線上服務，也適用於我們的實體門市。"},
+ {en:"the more..., the more...", zh:"越…就越…", ex:"The more tickets you buy, the more you save.", exZh:"您買越多票，省得就越多。"},
+ {en:"be eligible to V", zh:"有資格做…", ex:"Hotels and universities are eligible to recycle their used mattresses.", exZh:"飯店與大學有資格參與舊床墊回收計畫。"},
+ {en:"look forward to Ving", zh:"期待（做）…", ex:"I look forward to hearing from you soon.", exZh:"期待盡快收到您的回覆。"},
+ {en:"be intrigued when...", zh:"對…感到興趣", ex:"She was intrigued when a director approached her about mentoring.", exZh:"當主管找她談擔任導師一事時，她感到很有興趣。"},
+ {en:"provided that / unless", zh:"除非、只要", ex:"The coupon cannot be combined with any other offers.", exZh:"此優惠券不得與其他優惠合併使用。"},
+ {en:"be pleased to V", zh:"很高興…", ex:"I am pleased to be writing this letter of recommendation.", exZh:"我很高興撰寫這封推薦信。"},
+ {en:"be confident that...", zh:"確信…", ex:"I am confident my years of accounting experience would benefit your firm.", exZh:"我相信我多年的會計經驗將對貴公司有所助益。"}
+];
+
+/* ============ TEST 1 DATA ============ */
+const T1P5 = [
+{n:101, s:"Richard Pell only hires professional athletes to endorse ___ hair-care products.", c:["his","he","him","himself"], a:0, exp:"空格後接名詞 products，需要所有格代名詞 his。"},
+{n:102, s:"Last year, the Daejeon English News ___ the number of readers by adding a digital subscription option.", c:["needed","increased","joined","asked"], a:1, exp:"新增訂閱選項的結果是「增加」讀者數，故選 increased。"},
+{n:103, s:"Thanks to its ___ location in the region, Nortown is home to several large media companies.", c:["central","centers","centrally","centering"], a:0, exp:"空格修飾名詞 location，需形容詞 central。"},
+{n:104, s:"The Shubert Company is ___ effective at helping power plants reduce their carbon dioxide emissions.", c:["once","far","early","very"], a:3, exp:"very 為程度副詞，可直接修飾形容詞 effective。"},
+{n:105, s:"To track the location of your package, be sure to ___ the order number to the shipping department.", c:["provide","provided","provision","providing"], a:0, exp:"to 後接原形動詞，故選 provide。"},
+{n:106, s:"A diamond-shaped symbol next to merchandise indicates that the ___ has been discounted.", c:["property","item","idea","fare"], a:1, exp:"文意指「該商品」已打折，故選 item。"},
+{n:107, s:"Wilkes-Rogers customers who want more ___ to move around should try our new wireless headphone models.", c:["free","freely","freedom","freed"], a:2, exp:"more 之後需接名詞 freedom（自由度）。"},
+{n:108, s:"The economic development summit will be held ___ the Xi'an Trade Tower on September 22.", c:["to","at","down","of"], a:1, exp:"表示地點用介系詞 at。"},
+{n:109, s:"If your job duties change often, ___ updating your résumé is recommended.", c:["regular","regularly","regularity","regularized"], a:1, exp:"副詞 regularly 修飾動名詞 updating。"},
+{n:110, s:"___ researchers at Starlight Toys finalize their data, they will share it with executive officers.", c:["Why","Despite","Even","When"], a:3, exp:"表示時間的連接詞 When（當…時）。"},
+{n:111, s:"___ necklace that is shipped from Gillis Designers is given a thorough quality check.", c:["Whenever","Also","All","Each"], a:3, exp:"Each + 單數名詞，表示「每一條」。"},
+{n:112, s:"The Ansan Science Museum averages ___ 2,000 visitors per month.", c:["nearly","totally","relatively","fairly"], a:0, exp:"nearly 2,000（將近兩千）符合語意。"},
+{n:113, s:"Marketing employees should use the accounting department's watercooler while ___ is being replaced.", c:["they","them","theirs","their"], a:2, exp:"需要所有格代名詞 theirs，代替 their watercooler。"},
+{n:114, s:"It is ___ for the audience to hold its applause until the speaker has finished.", c:["enthusiastic","casual","exclusive","customary"], a:3, exp:"customary（慣例的）符合「觀眾應保留掌聲」的語境。"},
+{n:115, s:"Despite ___ that Legend Air would perform poorly with the entry of cheaper competition, it posted strong second-quarter earnings.", c:["predicted","predictable","predicts","predictions"], a:3, exp:"despite 後接名詞，故選 predictions。"},
+{n:116, s:"___ the entire month of May, parking will be prohibited on Cole Avenue.", c:["On","Throughout","Inside","Between"], a:1, exp:"Throughout 表示「整個…期間」。"},
+{n:117, s:"Main Street Restaurant offers a menu of ___ prepared lunch and dinner meals.", c:["thought","thoughtfulness","thoughts","thoughtfully"], a:3, exp:"副詞 thoughtfully 修飾過去分詞 prepared。"},
+{n:118, s:"Ms. Tsai was told that she would be contacted soon, ___ as early as next week.", c:["sufficiently","possibly","sincerely","patiently"], a:1, exp:"possibly（可能）符合語境。"},
+{n:119, s:"Videos of Korean pop music have become very popular ___ adolescents worldwide.", c:["including","whereas","among","within"], a:2, exp:"among + 複數群體，表示「在…之中」。"},
+{n:120, s:"Rydell Law Group chose to lease the office space ___ the landlord offered a discount.", c:["that","much as","no sooner","because"], a:3, exp:"because 表示原因，符合句意。"},
+{n:121, s:"Hasin Fariz turned a study on the ___ effects of sleep into a best-selling book.", c:["favorable","favor","favors","favorably"], a:0, exp:"形容詞 favorable 修飾名詞 effects。"},
+{n:122, s:"The Girard Botanical Archive has almost 300,000 plant ___, all neatly pressed onto archival paper.", c:["authorities","specimens","founders","specifics"], a:1, exp:"specimens（標本）符合植物典藏館語境。"},
+{n:123, s:"Wynston Containers is ___ a yearly shutdown of its factory so that it can be evaluated for safety and efficiency.", c:["involving","participating","implementing","producing"], a:2, exp:"implementing（實施）符合「執行年度停工」的語意。"},
+{n:124, s:"Clyden Bistro's ___ location is now occupied by Margie Sue's Bakery.", c:["recognized","delayed","responsible","former"], a:3, exp:"former location（前址）符合文意。"},
+{n:125, s:"The ___ to review plans to replace the Tronton Bridge will be scheduled soon.", c:["heard","hears","hearing","hear"], a:2, exp:"需要名詞 hearing（聽證會）作主詞。"},
+{n:126, s:"___ Amanda Simont finds a full-time job, she will open a savings account.", c:["As soon as","Prior to","In case of","Not only"], a:0, exp:"As soon as（一…就）連接兩個完整子句。"},
+{n:127, s:"The grocery store ___ vegetables from out of town until local prices went down last month.", c:["is buying","will be buying","has been buying","had been buying"], a:3, exp:"until…went down last month，需用過去完成進行式 had been buying。"},
+{n:128, s:"If all the documentation is ___, a construction permit should take four weeks to process.", c:["too much","over done","in order","on call"], a:2, exp:"in order 為固定用法，意指「井然有序、齊全」。"},
+{n:129, s:"Chung-Li Medicine provides health care to people in ___ remote areas.", c:["geographer","geographically","geographic","geography"], a:1, exp:"副詞 geographically 修飾形容詞 remote。"},
+{n:130, s:"___ and cost factored equally in choosing Cantavox as our main supplier.", c:["Reliability","Allowance","Dependence","Estimation"], a:0, exp:"Reliability（可靠性）與 cost 並列為考量因素。"}
+];
+
+const T1P6 = [
+ { id:1, range:"131–134", title:"CENTERVILLE 報導：Luigi's 餐廳",
+   text:"CENTERVILLE—Luigi's, the Italian restaurant located in the Monmouth Hotel, {{131}} its doors next Saturday after ten years in business. Chef Giovanni Modica left the restaurant several weeks ago, prompting rumors of a change. The space is going to be renovated this spring and then reopen with new management and a new {{132}} according to Linda Hughes, spokesperson for the Monmouth Hotel. {{133}} The restaurant's name, however, is {{134}} to be announced.",
+   zh:"森特維爾—位於蒙茅斯飯店內的義大利餐廳 Luigi's，將在營業十年後於下週六結束營業。主廚喬凡尼．莫迪卡幾週前離職，引發餐廳將有變動的傳言。飯店發言人琳達．休斯表示，這個空間將於今年春天整修，之後將以新的經營團隊和新菜單重新開幕。墨西哥料理將成為主打特色。不過，餐廳的新名稱目前尚未公布。",
+   blanks:[
+     {n:131, c:["was closed","will be closing","closed","to close"], a:1, exp:"文意指未來（next Saturday）即將結束營業，故用未來進行式 will be closing。"},
+     {n:132, c:["address","receipt","supply","menu"], a:3, exp:"新經營團隊搭配「新菜單」合乎文意。"},
+     {n:133, c:["Centerville has a diverse dining scene.","Mexican cuisine will be the focus.","Food costs have increased recently.","There are other cafés on Main Street."], a:1, exp:"承接上句「新菜單」，說明墨西哥料理將成為主打特色最合邏輯。"},
+     {n:134, c:["yet","really","besides","until"], a:0, exp:"is yet to be announced 為固定用法，意指「尚未公布」。"}
+   ]},
+ { id:2, range:"135–138", title:"求職信：Cost Accountant 職位",
+   text:"Dear Mr. Archerson,\nThank you for taking the time to meet with me today. I {{135}} our conversation, and I remain very interested in the position of cost accountant. I would welcome the opportunity to return for the third and final round of {{136}}.\nI am confident my years of accounting experience would benefit your firm. As discussed, over the last ten years, I have helped many companies save a {{137}} amount of money. I am especially adept at analysing the day-to-day operations of a business and helping to determine more cost-effective methods.\nI checked regarding your question about a potential start date. {{138}} I hope to hear from you in the near future.\nSincerely,\nJames Darrers",
+   zh:"親愛的阿契爾森先生：感謝您今天撥冗與我面談。我很享受我們的對話，並且仍然對成本會計師一職深感興趣。我很樂意有機會回來進行第三輪、也是最後一輪的面試。我相信我多年的會計經驗將對貴公司有所助益。正如討論過的，過去十年來，我協助許多公司省下了可觀的金額。我尤其擅長分析企業的日常營運，並協助找出更具成本效益的方法。關於您詢問的可能到職日期，我已經確認過：我可以在二月的第一週開始上班。期待盡快收到您的回覆。詹姆斯．達勒斯 謹上",
+   blanks:[
+     {n:135, c:["enjoy","enjoyed","enjoying","will enjoy"], a:1, exp:"描述今天已發生的對話，用過去式 enjoyed。"},
+     {n:136, c:["revisions","promotions","interviews","receptions"], a:2, exp:"求職情境中「第三輪面試」最合理，選 interviews。"},
+     {n:137, c:["substance","substantiate","substantially","substantial"], a:3, exp:"形容詞 substantial 修飾名詞 amount。"},
+     {n:138, c:["I have four additional questions to ask you.","I would be able to begin during the first week of February.","I am confident I have the potential for this position.","Thank you for the offer of employment."], a:1, exp:"承接「詢問到職日期」，回答具體到職時間最合邏輯。"}
+   ]},
+ { id:3, range:"139–142", title:"雪梨科技新聞：智慧灌溉系統",
+   text:"SYDNEY (5 January)—Olney Technology announced yesterday that its smart irrigation system is now available to commercial clients. The system is designed to dispense the proper amount of water to every plant on a farm. It works by measuring the amount of water in soil {{139}} the rates of evaporation and the amount of water used by every plant. {{140}} All of this data is continuously analysed to determine the most effective watering schedules. {{141}} anticipate that the system will reduce the average farm's water usage by 20 percent. They also believe it will {{142}} crop damage. By constantly monitoring soil conditions and adjusting watering schedules, the system ensures that crops are not over- or underwatered.",
+   zh:"雪梨（1月5日）—歐尼科技公司昨日宣布，其智慧灌溉系統現已提供給商業客戶使用。該系統的設計目的，是為農場上的每一株植物提供適量的水分。其運作方式是測量土壤中的含水量，同時考量蒸發速率以及每株植物的用水量。天氣預報也會被納入考量。所有這些數據會持續被分析，以決定最有效的灌溉時程。開發人員預估，此系統可將一般農場的用水量減少百分之二十。他們也相信這能防止作物受損。透過持續監測土壤狀況並調整灌溉時程，該系統能確保作物不會被過度或不足灌溉。",
+   blanks:[
+     {n:139, c:["since","while","as well as","as long as"], a:2, exp:"as well as 連接兩個並列的考量因素。"},
+     {n:140, c:["Weather forecasts are also taken into account.","Olney also offers a mobile phone app to track crop growth.","Larger irrigation systems can even spread plant food.","Installation times vary based on farm location."], a:0, exp:"承接「測量土壤水量」，補充「天氣預報也納入考量」最合邏輯，並銜接下句「所有數據」。"},
+     {n:141, c:["Developed","Developers","Developing","Developments"], a:1, exp:"需要名詞當主詞，Developers（開發人員）。"},
+     {n:142, c:["detect","prevent","treat","assess"], a:1, exp:"prevent crop damage（防止作物受損）符合文意。"}
+   ]},
+ { id:4, range:"143–146", title:"影展報導：Shiresberry Film Festival",
+   text:"SHIRESBERRY (February 15)—The second annual Shiresberry Film Festival begins on April 18 and {{143}} for five weeks. This year's offerings will not be limited to entries from North America and Europe. We will also be presenting {{144}} from Asia and South America. And everyone's favorite feature from last year's festival will be back: directors and screenwriters will hold question-and-answer sessions after their films' initial screening. Make sure you do not miss this {{145}} event. Tickets always sell out quickly. {{146}} Shiresberry Film Club members can now purchase priority tickets. Visit the Shiresberry Theater box office or www.shiresberrytheater.com.",
+   zh:"夏爾斯貝里（2月15日）—第二屆夏爾斯貝里影展將於4月18日開幕，為期五週。今年的片單不再侷限於北美與歐洲的作品，我們也將呈獻來自亞洲與南美洲的電影。去年影展最受歡迎的環節也將回歸：導演與編劇將在影片首映後舉行問答場次。千萬別錯過這場廣受歡迎的盛事，門票總是很快售罄。三月三日起，一般民眾即可購票。夏爾斯貝里影展俱樂部會員現在即可優先購票。請至夏爾斯貝里劇院售票處或造訪 www.shiresberrytheater.com。",
+   blanks:[
+     {n:143, c:["run","has run","will run","ran"], a:2, exp:"與 begins 並列的未來事件，用 will run。"},
+     {n:144, c:["movies","clothing","food","books"], a:0, exp:"影展情境，presenting movies 合乎文意。"},
+     {n:145, c:["political","popular","practical","preliminary"], a:1, exp:"popular event（廣受歡迎的活動）呼應「門票很快售罄」。"},
+     {n:146, c:["The awards will be presented by Hunter Johns.","Renovations to the space are nearly complete.","The later offerings were an even bigger success.","Sales are open to the general public on March 3."], a:3, exp:"承接「門票售罄」，說明一般售票日期，並銜接下句「會員優先購票」。"}
+   ]}
+];
+
+const T1P7 = [
+ { id:1, qrange:"147–148", title:"廣告：Sedwick Electronics 徵才活動",
+   text:"Sedwick Electronics Hiring Event\nMarch 2, 10 A.M.–5 P.M.\n22 Myer Street, Hanover, PA 17331\n\nSedwick Electronics is opening a new manufacturing facility in Hanover, Pennsylvania, and we need to fill many positions. We offer a wonderful work environment and great benefits to our employees.\nCome to the event and hear from employees from our Lancaster facility about their experience, learn about the open positions, and speak with our recruiters. No RSVP is necessary. Bring copies of your résumé.",
+   zh:"Sedwick電子公司徵才活動。3月2日，上午10點至下午5點。地址：22 Myer Street, Hanover, PA 17331。Sedwick電子公司即將在賓州漢諾威開設新的製造工廠，我們需要招募多個職缺。我們提供優質的工作環境與優渥的福利。歡迎參加本次活動，聆聽蘭卡斯特廠員工分享工作經驗、了解職缺內容，並與招募人員面談。無需事先報名，請攜帶您的履歷影本。",
+   qs:[
+     {n:147, q:"For whom is the advertisement intended?", c:["Recruiters","Job seekers","Local business owners","Current Sedwick Electronics employees"], a:1, exp:"整則廣告是為了招募新員工，對象是求職者。"},
+     {n:148, q:"What is stated about Sedwick Electronics?", c:["It is moving its headquarters.","It offers a training program for new employees.","It requires employees to wear uniforms.","It will have more than one location."], a:3, exp:"文中同時提到 Hanover 新廠與 Lancaster 現有廠，顯示不只一個據點。"}
+   ]},
+ { id:2, qrange:"149–150", title:"公告：Aguni Plumbing Supply 退貨政策",
+   text:"Aguni Plumbing Supply Returns\nBeginning March 1 at all Aguni Plumbing Supply locations, customers will be able to come to our stores to return purchases made online. For a complete refund, the return must be made within 30 days of purchase and must be accompanied by a receipt. In addition, the merchandise must be returned in the original packaging, and all components must be included. After 30 days, refunds will be limited to in-store credit only. Defective items may be exchanged for the same item only.",
+   zh:"Aguni水電材料退貨須知。自3月1日起，Aguni水電材料所有門市將開放顧客親臨門市退還線上購買的商品。若要獲得全額退款，退貨須在購買後30天內辦理，並須附上收據。此外，退貨商品須以原包裝退回，且所有配件須齊全。超過30天，退款僅限店內購物金。瑕疵商品僅能更換同款商品。",
+   qs:[
+     {n:149, q:"What will happen on March 1?", c:["A shipment will be returned.","A new policy will go into effect.","A promotional sale will take place.","A customer survey will be published."], a:1, exp:"3月1日起實施「可到店退貨」的新政策。"},
+     {n:150, q:"What is NOT a requirement for a complete refund?", c:["The return must be made at the original purchase location.","The return must be made within a certain time frame.","The item must be returned with all its components.","The item must be returned in the original packaging."], a:0, exp:"文中並未要求須在原購買門市退貨，其餘三項皆為明訂條件。"}
+   ]},
+ { id:3, qrange:"151–152", title:"行程表：Sonya Barlow 的週一行程",
+   text:"Peter,\nHere is my tentative schedule for Monday. Please check with these colleagues to confirm. Ani has arranged everything for my stay in sunny Samirabad—I certainly will not miss the weather here! My speech for the Samirabad Awards Banquet is nearly finalized. I will return to the office on Thursday, 15 February. If possible, please avoid making any appointments for the end of the week as I plan to focus on the Zoldanas Project when I return.\nSonya\n\nSchedule for Sonya Barlow — Monday, 12 February\n8:30 A.M. Breakfast with Evan Wong, Human Resources\n9:45 A.M. Phone conference financial update, Nasreen Akhtar\n10:30 A.M. Status of technology upgrades, Aaliyah Taffe\n11:15 A.M. New facilities proposal meeting, Mitch Carr\n12:30 P.M. Leave for airport\n4:52 P.M. Flight departs",
+   zh:"彼得，這是我週一的暫定行程，請與以下同事確認。艾妮已經為我在陽光普照的薩米拉巴德的行程都安排好了——我一定會很想念這裡的天氣！我在薩米拉巴德頒獎晚宴的演講內容也已接近定稿。我將於2月15日（週四）返回辦公室。若可以的話，週末請不要安排任何會議，因為我回來後打算專注於Zoldanas專案。桑妮亞",
+   qs:[
+     {n:151, q:"What will Ms. Barlow do in Samirabad?", c:["Take a vacation","Conduct a training session","Attend a special dinner","Meet an important client"], a:2, exp:"文中提到 Samirabad Awards Banquet（頒獎晚宴），屬於特別餐宴。"},
+     {n:152, q:"Who will likely discuss a new idea?", c:["Mr. Wong","Ms. Akhtar","Ms. Taffe","Mr. Carr"], a:3, exp:"Mitch Carr 的行程是 'New facilities proposal meeting'（新提案會議）。"}
+   ]},
+ { id:4, qrange:"153–154", title:"簡訊對話：拖曳機防雨",
+   text:"Javier Palomo [2:04 P.M.]: Are you still at the farm? I haven't made a shelter for the new tractor yet, and rain has been forecast for today.\nConrad Genet [2:06 P.M.]: I'm still here. It looks like it might rain any minute.\nJavier Palomo [2:07 P.M.]: Can you find a tarp to cover it?\nConrad Genet [2:12 P.M.]: I couldn't find a spare one in the shed. There is a large black tarp covering the hay bales, though.\nJavier Palomo [2:13 P.M.]: That one needs to stay there. Could you search the barn?\nConrad Genet [2:17 P.M.]: OK, I found a tarp, but it's quite dirty.\nJavier Palomo [2:18 P.M.]: That's fine. I'd rather clean the tractor than let it get drenched by the rain.\nConrad Genet [2:19 P.M.]: Okay.",
+   zh:"哈維爾：你還在農場嗎？我還沒幫新拖曳機做遮雨棚，而且今天預報會下雨。康拉德：我還在這裡，看起來隨時會下雨。哈維爾：你能找塊防水布蓋住嗎？康拉德：我在工具間找不到多的，不過蓋乾草捆的那塊黑色大防水布還在。哈維爾：那塊要留在原位，你可以到穀倉找找看嗎？康拉德：好，我找到一塊，但滿髒的。哈維爾：沒關係，我寧可清理拖曳機，也不要讓它被雨淋濕。康拉德：好的。",
+   qs:[
+     {n:153, q:"What does Mr. Palomo ask Mr. Genet to do?", c:["Protect a piece of equipment","Check the weather forecast","Put some tools in the shed","Move some hay bales"], a:0, exp:"整段對話核心是找防水布蓋住拖曳機，即保護設備。"},
+     {n:154, q:"At 2:18 P.M., what does Mr. Palomo most likely mean when he writes, \"That's fine\"?", c:["He is pleased that the tractor is clean.","He wants Mr. Genet to search the barn.","He is not concerned about the dirt.","He does not need Mr. Genet to work late."], a:2, exp:"他表示髒污無妨，寧可事後清理拖曳機也不要淋雨。"}
+   ]},
+ { id:5, qrange:"155–157", title:"新聞：地鐵廣播系統升級",
+   text:"Subway Sound to be Upgraded\nBOSTON (April 1)—The public address systems at selected subway stations are scheduled to be refurbished, the Transit Authority announced this week. The systems are used to make announcements to commuters both on the platforms and in the stations.\nLocal commuters welcomed the news, although for some it was long overdue.\n\"It can be pretty difficult to understand the announcements at some of the stations I use most frequently,\" said Ian Miller, who has taken the subway to work nearly every week for the past eighteen years. \"I had heard the reports about it on TV, and all I can say is that it is about time!\"\nSome of the systems currently in use are more than 30 years old. Worn-out speakers, wiring, microphones, and amplifiers will be replaced with new, more reliable devices. The work should be completed in October and cost more than $11 million.\nBoston's subway system came together in stages over the course of several years. The foundational component of the system's Green Line first opened on Tremont Street in the late 1890s. It was the first of its kind in the United States.",
+   zh:"波士頓（4月1日）——大眾運輸局本週宣布，部分地鐵站的公共廣播系統將進行整修。這些系統用於向月台及站內的通勤族發布廣播訊息。當地通勤族對此消息表示歡迎，儘管有些人認為早該進行了。『我常搭的幾個站，廣播真的很難聽清楚，』過去十八年來幾乎每週都搭地鐵上班的伊恩．米勒說。『我之前在電視上看過相關報導，只能說：終於等到了！』目前使用中的系統有些已超過30年歷史。老舊的喇叭、線路、麥克風和擴大機都將更換為更新、更可靠的設備。工程預計10月完工，費用超過1,100萬美元。波士頓地鐵系統是經過數個階段逐步建成的，系統中的綠線最早的路段於1890年代末在特雷蒙特街啟用，是美國第一條同類型路線。",
+   qs:[
+     {n:155, q:"What is the purpose of the article?", c:["To clarify where subway riders can locate information","To describe improvements at some subway stations","To announce the creation of a new subway line","To explain why subway schedules will be revised"], a:1, exp:"文章主旨是報導地鐵站廣播系統的整修計畫。"},
+     {n:156, q:"How does Mr. Miller feel about the plans?", c:["He expects the project to fail.","He is concerned about the cost.","He believes the work is unnecessary.","He has been waiting for the changes."], a:3, exp:"他說 'it is about time'（終於等到了），顯示他期待此改變已久。"},
+     {n:157, q:'The word "stages" in paragraph 5, line 2, is closest in meaning to', c:["steps","scenes","train cars","platforms"], a:0, exp:"came together in stages 意指「分階段完成」，stages 意近 steps。"}
+   ]},
+ { id:6, qrange:"158–160", title:"網頁：帆船修復公司創辦人",
+   text:"Enzo Moreau, Founder\nEnzo Moreau has always loved the sea, but he has not always been the shipbuilder he is known as today. — [1] — A civil engineer in the early years, he took a consultant position in Marseille almost a decade ago in order to be closer to the ocean. — [2] — Mr. Moreau soon found himself devoting nearly all of his free time to his passion—sailing. Taking a chance, he made yet another change: he used his life savings to start his own sailboat-restoration company, the Sailboat Factory. — [3] — The company did so well in its first year that Mr. Moreau decided to share his success by giving back to the community. — [4] — He has also written a number of articles about sailboat restoration for leading industry journals.",
+   zh:"創辦人安佐．莫羅一直熱愛大海，但他並非一直都是如今眾所皆知的造船師。他早期是一名土木工程師，大約十年前為了離海更近，他到馬賽接下一份顧問工作。莫羅先生很快發現自己幾乎把所有空閒時間都投入到他的熱情——航海——之中。他做出了另一個大膽的改變：拿出自己所有積蓄，創立了自己的帆船修復公司「Sailboat Factory」。公司第一年就經營得非常成功，莫羅先生決定藉此回饋社區。他開始利用下班後的時間在附近湖邊提供帆船課程。他也為業界頂尖期刊撰寫了多篇關於帆船修復的文章。",
+   qs:[
+     {n:158, q:"What was Mr. Moreau's first profession?", c:["Writer","Engineer","Shipbuilder","Consultant"], a:1, exp:"文中提到他早期是 civil engineer（土木工程師）。"},
+     {n:159, q:"What is indicated about Mr. Moreau?", c:["He is a business owner.","He plans to retire soon.","He won a community award.","He grew up close to the ocean."], a:0, exp:"他創立了自己的公司 the Sailboat Factory，因此是企業經營者。"},
+     {n:160, q:'In which of the positions marked [1], [2], [3], and [4] does the following sentence best belong?\n"He began offering sailing lessons at a nearby lake after hours, for example."', c:["[1]","[2]","[3]","[4]"], a:3, exp:"這句是「回饋社區」的具體例子，應接在該句之後，即位置 [4]。"}
+   ]},
+ { id:7, qrange:"161–163", title:"電子郵件：工地安全代表指派",
+   text:"From: Simona Westwood\nTo: Undisclosed recipients\nDate: 3 June\nSubject: Safety representative\n\nAs a follow-up to the contract agreement of 25 May between Roserburg City Hall (Sponsor) and Thore Construction (Subcontractor), a meeting was held on 2 June to discuss the selection of a safety representative based on the safety requirements and procedures noted in the contract agreement. Pierre Deparis was appointed as the safety representative for the project at Thore Construction. Thore Construction has confirmed that Mr. Deparis is fully qualified and has completed the 30-hour Safety Requirements and Procedures Training Course. Mr. Deparis will provide a certificate of training to City Hall prior to beginning work on-site. Thore Construction cannot delegate responsibility for project safety to third parties. This means that Mr. Deparis may not be substituted and will stay on-site until the completion of the project.\nSimona Westwood",
+   zh:"作為5月25日羅斯堡市政府（業主）與索雷建設公司（承包商）合約協議的後續，雙方已於6月2日召開會議，依據合約中訂定的安全要求與程序，討論選定安全代表一事。皮埃爾．德帕里被指派為索雷建設公司在本專案的安全代表。索雷建設公司已確認德帕里先生具備完整資格，並已完成30小時的安全要求與程序訓練課程。德帕里先生將在進場施工前，向市政府提交訓練證明。索雷建設公司不得將專案安全責任委託給第三方，這表示德帕里先生不得由他人替代，並將全程留守工地直至專案完成。",
+   qs:[
+     {n:161, q:"What was the purpose of the meeting?", c:["To revise a list of safety requirements","To discuss a proposed construction site","To fill a position for a project","To sign a final agreement"], a:2, exp:"會議目的是選定安全代表，即填補此職位。"},
+     {n:162, q:"What will Mr. Deparis do before construction begins?", c:["Estimate expenses","Contact his substitutes","Advertise an open position","Present proof of qualifications"], a:3, exp:"他將在施工前向市政府提交訓練證明，即出示資格證明。"},
+     {n:163, q:'The word "stay" in paragraph 2, line 3, is closest in meaning to', c:["delay","remain","wait","reside"], a:1, exp:"will stay on-site 意指「留在現場」，stay 意近 remain。"}
+   ]},
+ { id:8, qrange:"164–167", title:"報導：非洲時尚產業與電子商務",
+   text:"E-Commerce Opening Doors for African Fashion Industry\nADDIS ABABA (6 May)—Africa's role as a consumer of fashion has been on the rise in recent years. This trend is largely due to the emergence of e-commerce, which provides Africans the opportunity to buy clothing from retailers with no physical presence on the continent.\nPerhaps more importantly, though, the growth of e-commerce is enabling small-scale African designers to also become producers of fashion, as they showcase their collections to consumers worldwide. African shopping Web sites like Jumjum and Longa are making the work of African designers available for purchase not just throughout the continent, but also as far away as London and New York. — [1] —\n\"African designers are finally gaining visibility,\" says Mazaa Absher, founder of Abbi Sportscore, Africa's fastest-growing athletic footwear company. \"We have always had terrific design and production capacity here on the continent, but it was hard getting it out into the world. Now we are generating more sales online than we are in our stores.\" — [2] —\nEven as Ms. Absher has transformed her company into an international powerhouse, she continues to highlight the advantages of manufacturing its products in her home city of Nazret. — [3] — Africa's strong textile sector and innovative designs combine tradition and wearability, and this formula is allowing companies like hers to set their sights beyond the continent.\n\"As more cities in Ethiopia—and all over Africa—improve their manufacturing capacity, it will become easier to reach the rest of the world,\" says Ms. Absher. — [4] —",
+   zh:"阿迪斯阿貝巴（5月6日）——近年來，非洲作為時尚消費市場的角色日益提升，這主要歸功於電子商務的興起，讓非洲消費者得以向那些在非洲大陸沒有實體門市的零售商購買服飾。更重要的是，電子商務的成長也讓非洲的小型設計師得以成為時尚的生產者，向全世界消費者展示他們的作品。像Jumjum和Longa這樣的非洲購物網站，讓非洲設計師的作品不僅能在非洲大陸銷售，甚至遠銷倫敦與紐約。『非洲設計師終於獲得能見度了，』非洲成長最快的運動鞋公司Abbi Sportscore創辦人瑪札．阿布舍爾說。『我們一直都有出色的設計和生產能力，但過去很難把它推向世界。現在我們線上的銷售額已經超過實體門市。』即便阿布舍爾女士已將公司打造成國際知名品牌，她仍持續強調在自己家鄉納茲雷特生產的優勢。該市擁有四座成衣工廠，第五座也將於今年在鄰近的翁吉開工興建。非洲堅實的紡織產業與創新設計相結合，兼具傳統與實穿性，這正是像她公司這樣的企業得以放眼全球的原因。『隨著衣索比亞——以及非洲各地——越來越多城市提升製造能量，將世界的距離拉近就會越來越容易，』阿布舍爾女士說。",
+   qs:[
+     {n:164, q:"What is the main topic of the article?", c:["New trends in marketing athletic footwear","Increased competition in the African clothing market","Recent growth in the African fashion industry","The largest clothing companies in Africa"], a:2, exp:"全文主軸是非洲時尚產業近年的成長。"},
+     {n:165, q:"What is indicated about Abbi Sportscore?", c:["It sells its products only online.","It manufactures its shoes in Nazret.","It will be moving its main offices soon.","It was the first shoe company in Ethiopia."], a:1, exp:"文中提到 Ms. Absher 強調在其家鄉 Nazret 生產的優勢。"},
+     {n:166, q:"What is suggested about the Jumjum and Longa Web sites?", c:["They sell only handcrafted goods.","They receive orders from around the world.","They offer free shipping to London and New York.","They are planning to open retail stores."], a:1, exp:"文中提到商品遠銷倫敦、紐約等地，顯示訂單來自世界各地。"},
+     {n:167, q:'In which of the positions marked [1], [2], [3], and [4] does the following sentence best belong?\n"The city boasts four garment factories, with a fifth scheduled to be built this year in nearby Wonji."', c:["[1]","[2]","[3]","[4]"], a:2, exp:"此句補充說明 Nazret（該市）的製造優勢，應緊接在提到 Nazret 之後，即位置 [3]。"}
+   ]},
+ { id:9, qrange:"168–171", title:"簡訊對話：雜誌封面設計",
+   text:"Gary Park [10:23 A.M.]: I e-mailed you the cover design for our September issue a few minutes ago. Did you receive it?\nJill Riley [10:26 A.M.]: Yes, but is this the latest version? I thought we agreed that the background color should be lighter so the article titles are more visible.\nGary Park [10:28 A.M.]: I forgot—sorry about that! I'm just now sending the file with the most recent version.\nJill Riley [10:30 A.M.]: Opening it now... That's more like it. I'll forward it to Graphics and request a sample printout.\nJill Riley [10:35 A.M.]: Good morning, Mr. Ojeda. Our new cover design is ready. When do you think you'll have a chance to work on it?\nFrank Ojeda [10:38 A.M.]: Send it to me now. I'll have a print copy ready for your approval after lunch.",
+   zh:"蓋瑞：我幾分鐘前把九月號的封面設計寄給你了，你收到了嗎？吉兒：收到了，但這是最新版本嗎？我記得我們說好背景色要調淺一點，這樣文章標題才比較清楚。蓋瑞：我忘了，抱歉！我現在馬上把最新版本的檔案寄給你。吉兒：正在打開……這樣好多了。我會轉寄給美編部，並要求一份樣張。吉兒：早安，歐赫達先生，我們的新封面設計已經好了，您什麼時候方便處理呢？法蘭克：現在傳給我，午餐後我會準備一份樣張讓你確認。",
+   qs:[
+     {n:168, q:"Where do the people most likely work?", c:["At a bookstore","At a public library","At a television studio","At a magazine publisher"], a:3, exp:"對話提到「九月號封面設計」，顯示是雜誌出版社。"},
+     {n:169, q:"Why does Mr. Park apologize?", c:["He sent the wrong file.","He used an old e-mail address.","He missed a project deadline.","He lost an important document."], a:0, exp:"他一開始寄的是舊版本，因此道歉並重新寄送最新版本，等同寄錯檔案。"},
+     {n:170, q:'At 10:30 A.M., what does Ms. Riley most likely mean when she writes, "That\'s more like it"?', c:["The budget is more reasonable.","The color looks better.","The story is more interesting.","The schedule is more realistic."], a:1, exp:"承接背景色調淺的討論，她是指顏色看起來好多了。"},
+     {n:171, q:"What will Mr. Ojeda do by the afternoon?", c:["Approve a marketing plan","Produce a sample","Repair a printer","Make copies of an agreement"], a:1, exp:"他表示午餐後會準備一份樣張（print copy），即製作樣品。"}
+   ]},
+ { id:10, qrange:"172–175", title:"報導：球隊新贊助商 Thredquest Outfitters",
+   text:"Thredquest Outfitters\nWESTAN (March 6)—Thredquest Outfitters announced yesterday that it is the new sponsor of the Westan Panthers Basketball Team. The company officially replaced Marliner Sports on March 2. According to information from the Marliner Sports Web site, its longtime sponsorship agreement expired at the end of last season and was not renewed. Marliner Sports has since closed down its activewear division to focus on outdoor recreational equipment.\nUnder the new sponsorship agreement, Thredquest Outfitters will pay for the official game balls and nets, according to an e-mail from the company's marketing director, Marta Hsu. The company will also provide the players' jerseys, shorts, and court shoes. \"Transportation and lodging costs associated with out-of-town games will remain the team's responsibility and are largely covered by ticket sales,\" said the team's coach, Pedro Cardenas.\nMr. Cardenas, along with the team's business manager and the facilities and equipment manager, helped negotiate the terms of the new sponsorship agreement. Mr. Cardenas studied athletic training at Halston University and worked for several competitive basketball teams in the region, advising on injury prevention and providing treatment. Then, he joined the Panthers as the coach. \"We are looking forward to a long and fruitful relationship with Thredquest Outfitters,\" he said.",
+   zh:"韋斯坦（3月6日）——Thredquest戶外用品公司昨日宣布，成為韋斯坦黑豹籃球隊的新贊助商，該公司已於3月2日正式取代Marliner體育用品。根據Marliner體育用品官網資訊，該公司長期的贊助合約已於上季末到期，並未續約。Marliner體育用品目前已關閉其運動服飾部門，轉而專注於戶外休閒器材。根據該公司行銷總監瑪塔．徐的電子郵件，在新的贊助協議下，Thredquest將支付官方比賽用球與球網費用，也將提供球員的球衣、球褲與球鞋。球隊教練佩德羅．卡德納斯表示：『客場比賽的交通與住宿費用仍由球隊自行負擔，主要透過門票收入支應。』卡德納斯教練與球隊的業務經理、場館與器材經理共同協商了這份新贊助協議的條款。卡德納斯教練曾在哈斯頓大學主修運動訓練，並曾為區內多支競技籃球隊提供傷害預防諮詢與治療，之後才加入黑豹隊擔任教練。他說：『我們很期待與Thredquest展開長久且豐碩的合作關係。』",
+   qs:[
+     {n:172, q:"What is the article about?", c:["A new basketball coach","A change in a team's supporter","A company's marketing plan","An update to a team's schedule"], a:1, exp:"文章主旨是球隊更換贊助商。"},
+     {n:173, q:"What is true about Marliner Sports?", c:["It no longer sells athletic clothing.","It will close an outlet in Westan.","It is now owned by Mr. Cardenas.","It has merged with Thredquest Outfitters."], a:0, exp:"文中提到該公司已關閉運動服飾部門，即不再販售運動服飾。"},
+     {n:174, q:"What part of the Westan Panthers' budget is funded by audience attendance at games?", c:["Basketball equipment","Uniforms","Footwear","Team travel"], a:3, exp:"交通與住宿費用主要靠門票收入支應，即球隊差旅費用。"},
+     {n:175, q:"What most likely was Mr. Cardenas' previous job?", c:["Marketing director","Business manager","Facilities and equipment manager","Sports trainer"], a:3, exp:"他曾提供傷害預防諮詢與治療，符合運動傷害防護員／訓練師的角色。"}
+   ]},
+ { id:11, qrange:"176–180", title:"電子郵件與收據：McMann Home Furnishings 回饋點數",
+   text:"To: rriedewald@parasur.net.sr\nFrom: client_services@mhf.ca\nDate: April 2, 12:21 P.M.\nSubject: Your feedback\n\nDear Mr. Riedewald,\nThank you for filling out the McMann Home Furnishings (MHF) survey. To show our appreciation, we have added reward points to your account. They can be applied to the purchase of products offered online as well as those offered in our retail stores. Clearance items and those priced $15.00 and above may not be purchased using credits.\nTo use your reward points for an online purchase, select the items you would like to purchase and then check out. At the bottom of the page, select \"Apply credits.\" The value of the applied credits will appear on your order receipt as a special discount.\nIf you would prefer to use reward points at one of our retail locations, you can do so by logging in to your account on our Web site. Go to the My Rewards page, and then select \"Print as a coupon.\" The coupon will have a bar code that can be scanned at the store's checkout counter.\nSincerely,\nClient Services, McMann Home Furnishings\n\n— — —\nOnline Order #1157 · McMann Home Furnishings Store · March 19, 11:31 A.M.\nHand-Painted Picture Frame — Qty 1 — Price 10.00 — Special Discount −10.00\nSailboat Ceramic Mug — Qty 4 — Price 40.00 — Clearance Discount −20.00\nFloral Blanket — Qty 1 — Price 25.00\nPhoto Album — Qty 1 — Price 34.00 — Seasonal Item Discount −17.00\nItem total: 62.00 · Shipping: Free · Total: 62.00",
+   zh:"親愛的里德瓦爾德先生：感謝您填寫麥克曼家居用品（MHF）的問卷調查。為表達謝意，我們已在您的帳戶中加入回饋點數，可用於購買線上及實體門市所販售的商品。特價出清商品及單價15美元以上的商品不得使用點數折抵。若要在線上購物使用回饋點數，請選好商品後結帳，並在頁面底部點選『套用點數』，套用金額會以特別折扣的形式顯示在訂單收據上。若想在實體門市使用點數，可登入網站帳戶，前往『我的回饋』頁面，選擇『列印為優惠券』，優惠券上會有條碼，可在門市結帳櫃檯掃描使用。",
+   qs:[
+     {n:176, q:"According to the e-mail, how did Mr. Riedewald receive reward points?", c:["He won an online contest.","He participated in a customer survey.","He spent a certain amount of money.","He returned an item."], a:1, exp:"信件開頭提到感謝他填寫問卷調查（survey）。"},
+     {n:177, q:'In the e-mail, the phrase "filling out" in paragraph 1, line 1, is closest in meaning to', c:["emptying","supplying","completing","expanding"], a:2, exp:"filling out a survey 意指「填寫」問卷，意近 completing。"},
+     {n:178, q:"How can customers apply their reward points in an MHF retail store?", c:["By entering their account number","By entering their phone number","By scanning a coupon's bar code","By going to the Client Services Department"], a:2, exp:"文中說明優惠券上的條碼可在門市掃描使用。"},
+     {n:179, q:"According to the receipt, what is true about Mr. Riedewald?", c:["He paid for delivery of the items.","He purchased the items in the evening.","He paid over $70 for all items combined.","He purchased only one item at regular price."], a:3, exp:"四樣商品中僅 Floral Blanket 沒有折扣，是唯一以原價購買的商品。"},
+     {n:180, q:"What item did Mr. Riedewald most likely purchase using reward credits?", c:["The picture frame","The ceramic mug","The floral blanket","The photo album"], a:0, exp:"依規定僅單價15美元以下、非清倉品可用點數折抵；相框（$10）全額折抵，符合點數使用資格。"}
+   ]},
+ { id:12, qrange:"181–185", title:"電子郵件與行程表：Garcia Architecture 第二季出差排程",
+   text:"To: All Staff\nFrom: Cassandra Clausen, Office Manager\nDate: February 17\nRe: Second quarter travel schedule\n\nThe staff's travel schedule for the second quarter is now posted online. These months tend to be our busiest, so it is important that you keep the schedule updated. To avoid confusion, please include travel, whether domestic or international, only after it has been approved by a department supervisor. Do not forget that any travel exceeding ten consecutive business days is considered long-term and requires additional approval from the division head.\nAlso, please note that there will likely be a few days of overlap in the travel dates of department supervisors during this quarter. For instance, Tessa Alexander has just been invited to lead several workshops in Seoul. Her dates are not yet confirmed, but her trip is expected to be at the same time as Natasha Danilchenko's trip to Denver. Bear in mind that any date-sensitive documents or approvals requiring the signature of a department supervisor should be acquired ahead of your departure.\nLet me know if you encounter difficulty viewing or editing the schedule. Have a fantastic second quarter.\nBest,\nCassandra\n\nGarcia Architecture Group — Travel Schedule, April–June\nImportant Reminders\n- Requests for long-term travel should be directed to Laura Garcia.\n- This is a schedule of conferences and trade events requiring off-site travel. Please send information regarding sick leave and vacation time to Devon Taylor at Human Resources for entry into a separate calendar.\n\nApril 3–8 — Natasha Danilchenko — Symposium on Modern City Structure, Denver\nApril 22–27 — Tania Schultz — Safety in Factory Design Workshop, Tokyo\nMay 1–10 — Gil Shaw — International Urban Architecture, Singapore\nMay 1–10 — Natasha Danilchenko — International Urban Architecture, Singapore\nJune 7–12 — Dionne O'Donnell — Reflections in Architecture Exposition, Ottawa",
+   zh:"致全體員工，發信人：Cassandra Clausen（辦公室經理），主旨：第二季出差排程。第二季的員工出差排程現已公布於線上。這幾個月通常是我們最忙碌的時期，因此請務必隨時更新排程。為避免混亂，出差（不論國內或國外）須先經部門主管核准後才能登錄。請注意，連續超過十個工作天的出差視為長期出差，須額外經事業處主管核准。\n另外請留意，本季部門主管的出差日期可能會有幾天重疊。例如，泰莎．亞歷山大剛獲邀到首爾主持數場工作坊，她的確切日期尚未確定，但預計會與娜塔莎．丹尼爾琴科前往丹佛的行程時間相同。請留意任何有時效性、需要部門主管簽署的文件或核准，應於出發前先行取得。\n若您在檢視或編輯排程時遇到困難，請通知我。祝大家第二季順利。Cassandra\n\nGarcia建築事務所——出差排程，四月至六月。重要提醒：長期出差申請請洽Laura Garcia；本表僅列出需離站出差的會議與商展活動，病假與休假資訊請另行送交人資部Devon Taylor登錄於另一份行事曆。",
+   qs:[
+     {n:181, q:"What is the purpose of the e-mail?", c:["To invite employees to attend an event","To request feedback on a recent meeting","To encourage participation in conferences","To announce the availability of an online document"], a:3, exp:"信件開頭即說明第二季出差排程「現已公布於線上」，即宣布線上文件已可查閱。"},
+     {n:182, q:"Why most likely are Ms. Alexander's plans not included on the schedule?", c:["Her travel dates fall within the third quarter.","The schedule lists only confirmed travel.","The schedule is limited to domestic travel.","She missed the deadline for travel approval."], a:1, exp:"信中提到她的日期「尚未確定」，暗示排程表僅列出已確認的行程。"},
+     {n:183, q:"Why are employees asked to contact Ms. Taylor?", c:["To inform her of absences","To request approval for long-term travel","To report updates to their contact information","To seek advice on presenting at trade shows"], a:0, exp:"病假與休假資訊須送交Devon Taylor，即通報請假／缺勤事宜。"},
+     {n:184, q:"What is Ms. Garcia's job title?", c:["Office Manager","Department Supervisor","Division Head","Head of Human Resources"], a:2, exp:"長期出差需經「事業處主管」核准，且長期出差申請逕洽Laura Garcia，可推知她就是事業處主管。"},
+     {n:185, q:"When will Ms. Alexander most likely be traveling?", c:["April 3–8","April 22–27","May 1–10","June 7–12"], a:0, exp:"信中提到她的行程預計與丹尼爾琴科「前往丹佛」的行程同時，而丹佛行程排定在4月3–8日。"}
+   ]},
+ { id:13, qrange:"186–190", title:"新聞稿與電子郵件：Hilsun Media 新任執行長",
+   text:"FOR IMMEDIATE RELEASE\nNew Leader at Hilsun\nVancouver (21 June)—Hilsun Media Company has selected Diana Silva as its new Chief Executive Officer. After graduating with a master's degree in business administration from Vardia University, Ms. Silva joined Cordha Networks, where she earned a reputation as a skilled negotiator. She presided over the merger of Cordha and Renar Universal five years ago. She has worked for Cordha for ten years, the last three as Vice President of Sales.\nMs. Silva replaces Gregor Zuev, who announced his departure last year. After an extensive search, Ms. Silva was the board's unanimous choice for CEO. She will begin her new position in August.\n\nTo: All staff\nFrom: Alex Briard\nSubject: CEO announcement\nDate: 21 June\n\nDear Colleagues,\nAs you know, we, the board of directors here at Hilsun Media have been searching for a new CEO. As of today, we can officially announce that Diana Silva has been selected for the position, and we are thrilled that she will be joining us.\nAt this time, we do not anticipate changes in departmental leadership, nor do we foresee new policies regarding promotions. Naturally, Ms. Silva may elect to revise both over time, but she has expressed her confidence in the assignments and policies as they currently stand.\nMs. Silva will be welcomed with a luncheon in her honor on her first day. The tentative location for it is Tenley Hall. You can expect to see messages asking about menu preferences, and special activities over the next few weeks.\nAll my best,\nAlex Briard\n\nTo: Diana Silva\nFrom: Alton Hague\nSubject: News\nDate: 23 June\n\nI just heard the news about your new position, and I am so pleased for you. You have been wonderful to work with these past several years. The sales division in particular will miss your energy and leadership. I hope that we can continue to stay in touch and, with luck, work together in the future.\nBest,\nAlton",
+   zh:"即時發布：Hilsun新任領導人。溫哥華（6月21日）——Hilsun媒體公司已選定黛安娜．西爾瓦為新任執行長。她自Vardia大學取得企管碩士學位後，加入Cordha Networks，並以出色的談判能力建立聲譽。五年前，她主導了Cordha與Renar Universal兩家公司的合併案。她在Cordha任職十年，最後三年擔任業務副總裁。西爾瓦女士將接替去年宣布離職的格雷戈爾．祖耶夫。經過廣泛遴選，西爾瓦女士獲董事會一致同意成為執行長人選，將於八月正式上任。\n\n致全體員工，發信人Alex Briard，主旨：執行長人選公告：各位同仁，如各位所知，我們Hilsun媒體的董事會一直在尋找新任執行長。截至今日，我們正式宣布黛安娜．西爾瓦已獲選，也很高興她即將加入我們。目前我們預料部門領導層不會有變動，也不會有新的升遷政策。當然，西爾瓦女士未來可能會選擇修訂上述安排與政策，但她已表達對現有人事安排與政策的信心。西爾瓦女士上任首日，公司將為她舉辦一場午宴以表歡迎，暫訂地點為Tenley廳。接下來幾週，各位將會收到詢問菜單偏好及特別活動安排的訊息。\n\n致黛安娜．西爾瓦，發信人Alton Hague，主旨：消息：我剛聽到你新職位的消息，真心為你感到高興。這幾年與你共事非常愉快，業務部門特別會想念你的活力與領導。希望我們能持續保持聯繫，未來也許還有機會再度合作。",
+   qs:[
+     {n:186, q:"What does the press release indicate about Ms. Silva?", c:["She used to work for Renar Universal.","She was in charge of uniting two companies.","She recently graduated from university.","She hired Mr. Zuev at Cordha Networks."], a:1, exp:"她主導了 Cordha 與 Renar Universal 的合併案，即負責整合兩家公司。"},
+     {n:187, q:"Who most likely is Mr. Briard?", c:["A department manager","A member of Hilsun's board","Ms. Silva's assistant","Ms. Silva's former supervisor"], a:1, exp:"他信中提到「我們Hilsun媒體的董事會」，顯示他是董事會成員。"},
+     {n:188, q:"What is suggested about the luncheon for Ms. Silva?", c:["It will take place in August.","It will be held at a local restaurant.","The menu has been finalized.","The company hosts it annually."], a:0, exp:"午宴訂於她上任首日，而她將於八月上任。"},
+     {n:189, q:"Why did Mr. Hague write the e-mail to Ms. Silva?", c:["To extend a job offer","To schedule an appointment","To offer his congratulations","To discuss travel plans"], a:2, exp:"信件內容是恭喜她獲得新職位。"},
+     {n:190, q:"Where does Mr. Hague most likely work?", c:["At Hilsun Media","At Vardia University","At Renar Universal","At Cordha Networks"], a:3, exp:"他提到「業務部門特別會想念你」，呼應西爾瓦女士曾在Cordha擔任業務副總裁，顯示他是Cordha的同事。"}
+   ]},
+ { id:14, qrange:"191–195", title:"網站、表單與電子郵件：Runkle 圍籬臨時租賃",
+   text:"https://www.runklefencing.co.uk — Temporary Fencing Service\nNeed a temporary fence installed at your residence, workplace, or special event? Our expert team will deliver and install chain-link fencing on the booked date and time. When the fence is no longer needed, we will take it down and haul it away. Like our residential and commercial fencing, our temporary fences are obtained from the best manufacturers using the finest materials. Our fences have a tidy, sturdy, professional appearance that local residents and businesses appreciate. We also see to all legally required inspections and certifications.\nReady for a price quote? Contact us today via our Online Quote service. Be sure to provide the following information so we can provide an accurate estimate:\n1. The preferred height of your fence (Be aware that local regulations commonly allow a maximum height of three metres.)\n2. The perimeter of the area you need to enclose\n3. The number of gated entrances needed\n4. The number of days the fence needs to be up\n\nName: Marguerite Carhart   Phone: (0117) 555-9102\nInstallation Address: 438 Stretford Way, Bristol BS5 7TB\nE-mail: mcarhart@stockporteventcentre.co.uk\nToday's date: 8 August\nFence Details: I need a temporary three-metre-tall fence installed around the Stockport Event Centre within the next two weeks. This is to prevent the public from entering while we make renovations from 18 to 30 August. Two gates are needed so that workers and vehicles may enter and leave the location.\n\nTo: mcarhart@stockporteventcentre.co.uk\nFrom: hmontalbo@runklefencing.co.uk\nDate: 9 August\nSubject: Quote Number 080817\nAttachment: fencequote_mcarhart\n\nDear Ms. Carhart,\nThank you for your enquiry. Please see the attached estimate for the work you requested. Note that the price of delivery is included at no further charge unless a rush order—one providing less than three weeks' notice—is required. This is a rough estimate based on the information you provided. If you ring us at (0117) 555-2938 and provide us with a missing detail, I can give you a more accurate quote.\nYou might also consider including a plastic curtain with your order. This would be wrapped around and fastened to the fence, hiding the construction site from the view of pedestrians. If this interests you, we can include it in the revised quote.\nBest regards,\nHoward Montalbo",
+   zh:"Runkle圍籬公司網站——臨時圍籬服務：需要在住家、職場或特殊活動場地安裝臨時圍籬嗎？我們的專業團隊會在預約日期與時間送貨並安裝鏈式圍籬。不再需要時，我們會拆除並運走。與住宅及商用圍籬一樣，我們的臨時圍籬皆選用頂級廠商的優質材料，外觀整潔、堅固、專業，深受當地居民與商家肯定。我們也負責處理所有法定必要的檢驗與認證。想要報價嗎？歡迎透過線上報價服務與我們聯繫，請提供以下資訊以利精確估價：1. 您偏好的圍籬高度（請注意當地法規通常允許最高三公尺）2. 需要圍起範圍的周長 3. 所需的出入口數量 4. 圍籬需架設的天數。\n\n表單：瑪格麗特．卡哈特，安裝地址：Stretford Way 438號，布里斯托，今日日期：8月8日。圍籬需求：我需要在Stockport活動中心周圍安裝一座臨時的三公尺高圍籬，希望在兩週內完成，目的是在8月18日至30日整修期間阻擋民眾進入。需要兩個出入口，讓工作人員與車輛可以進出。\n\n回信：親愛的卡哈特女士，感謝您的詢問。附件為您所需工程的估價單。請注意，除非是急件訂單（通知時間少於三週），否則運送費用已包含在報價中、不再另計。這是根據您提供的資訊所做的粗略估價，若您致電我們並補充缺漏的細節，我可以提供更精確的報價。您也可以考慮加購塑膠布幕，包覆並固定在圍籬上，可遮擋施工現場、避免行人看見。如果您有興趣，我們可以將此項目納入修訂後的報價中。",
+   qs:[
+     {n:191, q:"What does the Web site indicate about fences taller than three meters?", c:["They are made of plastic.","They are usually prohibited by law.","They require special transportation.","They must be ordered directly from the manufacturer."], a:1, exp:"網站提到當地法規通常允許最高三公尺，暗示超過此高度通常屬違法。"},
+     {n:192, q:"According to the form, why does Ms. Carhart need a temporary fence installed?", c:["To mark a property line","To draw attention to an exhibit","To control a crowd at a special event","To limit public access to a work site"], a:3, exp:"表單提到圍籬是為了在整修期間阻擋民眾進入施工現場。"},
+     {n:193, q:"What information does Ms. Carhart fail to give about the fence she needs?", c:["The height of the fence to be erected","The dates when the fence is needed","The perimeter of the area to be enclosed","The number of entrances needed"], a:2, exp:"她提供了高度、日期、出入口數量，唯獨沒有提供需圍起範圍的周長。"},
+     {n:194, q:"What is implied about Ms. Carhart's fence project?", c:["There will be a charge for delivery.","The project involves work at several job sites.","Extra workers must be hired to install the fence.","Inspectors must first approve the project."], a:0, exp:"她申請日期距離施工不到三週，屬於急件訂單，因此需另計運送費用。"},
+     {n:195, q:"Why does Mr. Montalbo recommend adding a curtain?", c:["It would act as a noise barrier.","It would help keep in dust.","It would serve as a visual screen.","It would improve safety conditions."], a:2, exp:"信中提到布幕可遮擋施工現場、避免行人看見，即作為視覺屏障。"}
+   ]},
+ { id:15, qrange:"196–200", title:"網頁與電子郵件：建築師大會會議室安排",
+   text:"http://www.wiarchitecture.org/eventrooms\nAll presentations for the Women in Architecture Conference will take place on the third floor of the Expo Center. All rooms, including both the smaller workshop rooms and the larger lecture halls, have podiums, microphones, speakers, projectors, screens, and Internet access. Presenters with special room needs should contact the conference organizers, but refreshment and beverage service will not be available in any of the event rooms, but will be set up in the third-floor lobby.\nRoom Capacity: Red, Blue, Gold Rooms 25 participants · Cape Hall 50 participants · Todd Hall 75 participants · Prinzer Hall 125 participants\n\nTo: Eva Velazquez <evelazquez@vigi.com>\nFrom: Angie Wong <awong@wiarchitecture.org>\nRe: Workshop\nDate: November 2\nAttachment: Expo map\n\nDear Ms. Velazquez,\nThe presentation that you and your colleague will deliver, Unique Visions in Architecture, has proven to be very popular. Since we have had more than 90 conference participants sign up for your presentation, we have decided to assign you to the largest lecture hall, rather than Todd Hall, as we had previously indicated. Unfortunately, I do not seem to have your colleague's e-mail address. Would you mind sending this updated information to her? Thank you for your participation for a second year in a row.\nAngie Wong\n\nTo: Amalia Harris <aharris@vigi.com>\nFrom: Eva Velazquez <evelazquez@vigi.com>\nRe: Workshop\nDate: November 2\nAttachment: Expo map\n\nHello Amalia,\nPlease see the forwarded message and the attached map Ms. Wong sent to me this morning. It looks like we have been upgraded to a larger room due to the popularity of our presentation—great news! It might be a good idea if we get together next week to go through our presentation and finalize the agenda and the handouts we have chosen to distribute. Let me know what time might work for you.\nThanks,\nEva",
+   zh:"女性建築師大會網頁：所有簡報場次皆於博覽中心三樓舉行。所有房間（包含較小的工作坊教室與較大的演講廳）皆配有講台、麥克風、喇叭、投影機、螢幕與網路。有特殊場地需求的講者請聯絡大會主辦單位；茶點與飲料服務不會設置於任何活動室內，而會統一設於三樓大廳。房間容納人數：紅廳、藍廳、金廳各25人；Cape廳50人；Todd廳75人；Prinzer廳125人。\n\n致Eva Velazquez，發信人Angie Wong，主旨：工作坊：親愛的Velazquez女士，您與您的同事將發表的演講《Unique Visions in Architecture》已證實非常受歡迎。由於已有超過90位與會者報名參加您的場次，我們決定將您改分配至最大的演講廳，而非原先安排的Todd廳。可惜我這邊沒有您同事的電子郵件地址，能否請您將這項更新資訊轉告她？也謝謝您連續第二年參與本次大會。\n\n致Amalia Harris，發信人Eva Velazquez，主旨：工作坊：哈囉Amalia，請見轉寄的訊息以及Wong女士今早寄給我的地圖附件。看來因為我們的簡報太受歡迎，場地被升級成更大的房間了——真是好消息！也許我們下週可以聚一下，一起確認簡報內容、定案議程，以及要發放的講義。請讓我知道你方便的時間。"
+   ,
+   qs:[
+     {n:196, q:"According to the Web page, what is unavailable in the event rooms?", c:["Podiums","Projectors","Internet","Catering"], a:3, exp:"網頁提到茶點與飲料服務不會設置於活動室內，即無供餐服務。"},
+     {n:197, q:"What is suggested in the first e-mail about Ms. Velazquez?", c:["She prefers to present in smaller rooms.","She has published a book.","She is a conference organizer.","She has not presented at this conference before."], a:1, exp:"演講標題《Unique Visions in Architecture》以斜體標示，暗示這其實是她的著作／出版品名稱。"},
+     {n:198, q:"Where will the presentation Unique Visions in Architecture be given?", c:["In the Blue Room","In Cape Hall","In Todd Hall","In Prinzer Hall"], a:3, exp:"信中提到改分配至「最大的演講廳」，容納人數最多的是 Prinzer Hall（125人）。"},
+     {n:199, q:"What does Ms. Wong ask Ms. Velazquez to do?", c:["Forward an e-mail","Register for an event","Confirm her payment details","Provide biographical details"], a:0, exp:"Wong請她將更新資訊轉告同事，即代為轉寄郵件內容。"},
+     {n:200, q:"Who most likely is Ms. Harris?", c:["Ms. Velazquez's classmate","Ms. Wong's editor","Ms. Velazquez's work colleague","Ms. Wong's assistant"], a:2, exp:"信中提到「您與您的同事將發表的演講」，而第二封信正是寄給Harris，可知她就是Velazquez的同事。"}
+   ]}
+];
+
+/* ============ TEST 2 DATA ============ */
+const T2P5 = [
+{n:101, s:"The coaches are ___ that the Gremon Soccer Club will win tomorrow night.", c:["hope","hopes","hopeful","hopefully"], a:2, exp:"be動詞後需形容詞 hopeful，構成 be hopeful that…。"},
+{n:102, s:"Mr. Hodges ___ that volunteers sign up to assist with the Hannock River cleanup by Friday.", c:["requesting","to be requested","requests","to request"], a:2, exp:"request that + 子句（省略should）用原形動詞 sign up，主要動詞用 requests。"},
+{n:103, s:"The office's copy machine will be out of service until ___ notice.", c:["extra","temporary","further","ongoing"], a:2, exp:"until further notice（直到另行通知）為固定用法。"},
+{n:104, s:"If ___ are not satisfied with an item, return it for a full refund within 30 days of purchase.", c:["you","your","yours","yourself"], a:0, exp:"需要主格代名詞 you 作 if 子句主詞。"},
+{n:105, s:"Our most recent survey was sent to clients just last week, ___ it is too soon to send another one.", c:["when","since","so","finally"], a:2, exp:"so 表示結果，符合句意。"},
+{n:106, s:"Guests were ___ with the table decorations for the company banquet.", c:["impressive","impressed","impressing","impressively"], a:1, exp:"be impressed with 表示「對…感到印象深刻」。"},
+{n:107, s:"Wilkes-Rogers customers who want more ___ to move around should try our new wireless headphone models.", c:["free","freely","freedom","freed"], a:2, exp:"more 之後需接名詞 freedom。"},
+{n:108, s:"Inclement weather was ___ responsible for the low turnout at Saturday's Exton Music Festival.", c:["largely","large","largest","larger"], a:0, exp:"副詞 largely 修飾形容詞 responsible。"},
+{n:109, s:"The location of next month's online gaming forum is yet to be ___.", c:["concluded","prevented","invited","decided"], a:3, exp:"be yet to be decided（尚未決定）符合語意。"},
+{n:110, s:"The annual report has been posted online, ___ the director's office has not yet received a printed copy.", c:["but","why","with","once"], a:0, exp:"but 表示對比轉折。"},
+{n:111, s:"Tomorrow at ___ 12:15 P.M., the mayor will break ground at the site of the new courthouse.", c:["precise","precision","precisely","preciseness"], a:2, exp:"副詞 precisely 修飾時間 12:15 P.M.。"},
+{n:112, s:"Compri Tech, Inc., was able to increase its profits ___ making its processes more efficient.", c:["around","by","to","for"], a:1, exp:"by + Ving 表示方法／手段。"},
+{n:113, s:"An online module will be provided for those ___ cannot attend the training session.", c:["who","what","when","where"], a:0, exp:"關係代名詞 who 指代 those（人）。"},
+{n:114, s:"Before the updated design can go into ___, it must be approved by management.", c:["product","producer","productive","production"], a:3, exp:"go into production（投入生產）為固定用法。"},
+{n:115, s:"Ms. Valdez' sales numbers are good ___ for her to be considered for the employee-of-the-month award.", c:["forward","even","ahead","enough"], a:3, exp:"形容詞 + enough + for + 受詞 + to V 為固定句型。"},
+{n:116, s:"Mr. Nigam was ___ retirement when his boss asked him to be the head of security at the new facility.", c:["under","ahead of","nearby","close to"], a:3, exp:"be close to retirement（即將退休）符合語意。"},
+{n:117, s:"Milante Shoes ___ altered the firm's marketing strategy after a recent economic shift.", c:["quick","quickest","quickly","quicken"], a:2, exp:"副詞 quickly 修飾動詞 altered。"},
+{n:118, s:"The Auto Tools Manufacturing Convention will begin with an informal ___ on Friday evening.", c:["destination","section","reception","invention"], a:2, exp:"an informal reception（非正式招待會）符合語境。"},
+{n:119, s:"The Rockton Restaurant chain employs standardized practices to ensure a ___ customer experience.", c:["consist","consistent","consisting","consistently"], a:1, exp:"形容詞 consistent 修飾名詞 experience。"},
+{n:120, s:"The third-shift lead position ___ available and can be applied for in person at the warehouse.", c:["to become","had to become","has become","becoming"], a:2, exp:"現在完成式 has become 表示已成為（至今的狀態）。"},
+{n:121, s:"As our regular provider did not have the desks we needed in stock, we ordered from a local store ___.", c:["namely","instead","otherwise","though"], a:1, exp:"instead（改為、取而代之）符合語意。"},
+{n:122, s:"Aaron Park's new book features photographs of homes designed and built by the homeowners ___.", c:["itself","himself","themselves","ourselves"], a:2, exp:"反身代名詞須與複數名詞 homeowners 一致，選 themselves。"},
+{n:123, s:"Kieu Tech Services ___ to build three more data centers in southern Vietnam in the next two years.", c:["refers","delivers","intends","indicates"], a:2, exp:"intends to V（打算）符合語意。"},
+{n:124, s:"___ our public relations manager, Ms. Ghazarian has just been appointed vice president of media relations.", c:["Sincerely","Immediately","Solely","Formerly"], a:3, exp:"Formerly（先前曾任）符合「原本是公關經理、現升任副總裁」的語境。"},
+{n:125, s:"The Dubai Physicians Group believes that ongoing ___ between researchers and practitioners is essential.", c:["collaborate","collaborated","collaboration","collaborates"], a:2, exp:"ongoing 修飾名詞，需名詞 collaboration。"},
+{n:126, s:"All Hershel Industries employees must have a valid ID card ___ enter the building.", c:["in order to","as long as","regarding","always"], a:0, exp:"in order to V 表示「為了…」。"},
+{n:127, s:"Hotels and universities are ___ to recycle their used mattresses through the city's recycling program.", c:["systematic","eligible","familiar","successful"], a:1, exp:"be eligible to V（有資格）符合語意。"},
+{n:128, s:"Kovox Ltd. aims to optimize quality ___ reducing the impact on the environment.", c:["which","while","because","unless"], a:1, exp:"while 表示「同時」，連接兩個並行目標。"},
+{n:129, s:"___ the potential success of a product is often done through market research.", c:["Calculate","Calculation","Calculating","Calculated"], a:2, exp:"動名詞 Calculating 作主詞。"},
+{n:130, s:"Despite initial ___ over the size of the venue, the Westover Fashion Show was a great success.", c:["critical","criticize","critically","criticism"], a:3, exp:"despite 後接名詞 criticism。"}
+];
+
+const T2P6 = [
+ { id:1, range:"131–134", title:"PGD銀行公告信",
+   text:"Dear PGD Account Holder,\nPGD Bank strives {{131}} the highest levels of client security and service. This applies not only to online- and telephone-based services, but also to our brick-and-mortar locations. Our three branch offices have proudly been a part of the community {{132}} a combined total of 40 years.\nTo assist you even better in the future, our Smithville branch will be temporarily closed for renovations July 8–22. {{133}} In the meantime, our other two regional branches in Pine Grove and Bradford will maintain normal business {{134}}. We value your feedback and will respond to any concerns that you may have as soon as possible.\nSincerely,\nEdwin Chen, Operations Manager\nPGD Bank",
+   zh:"親愛的PGD銀行客戶：PGD銀行致力於提供最高水準的客戶安全與服務，此原則不僅適用於線上及電話服務，也適用於我們的實體分行。我們三間分行已在社區服務合計長達40年之久。為了未來能提供您更好的服務，我們的Smithville分行將於7月8日至22日暫停營業進行整修。造成的不便，我們深感抱歉。在此期間，我們另外兩間分行（Pine Grove與Bradford）將維持正常營業時間。我們重視您的意見，並將盡快回應您可能提出的任何疑慮。",
+   blanks:[
+     {n:131, c:["to provide","provided","providing","to be provided"], a:0, exp:"strive to V（力求）為固定用法。"},
+     {n:132, c:["except","amid","near","for"], a:3, exp:"for a combined total of 40 years（合計長達40年）。"},
+     {n:133, c:["Unfortunately, services will be limited.","We thank you for trusting in PGD Bank over these years.","We apologize for any inconvenience this may cause.","Traffic on the boulevard has increased lately."], a:2, exp:"承接「分行暫停營業整修」，為造成的不便致歉最合邏輯。"},
+     {n:134, c:["investments","hiring","hours","interests"], a:2, exp:"maintain normal business hours（維持正常營業時間）。"}
+   ]},
+ { id:2, range:"135–138", title:"推薦信：Nobuo Omoto",
+   text:"Dear Hiring Manager:\nI am pleased to be writing this letter of recommendation for Mr. Nobuo Omoto. He {{135}} as an intern for our Finance Department. During this time, Mr. Omoto worked on a variety of tasks, from {{136}} data for budget reports to reviewing files ahead of our annual audit. Mr. Omoto quickly mastered our regular procedures, and he routinely made suggestions for making our workflow processes more efficient. In fact, some of these {{137}} have since been incorporated into the department's everyday operations.\nI strongly recommend Mr. Omoto for any entry-level position in the financial services industry. {{138}} If I can be of any further assistance, please do not hesitate to contact me at the above address or by e-mail.\nSincerely,\nOscar Jimenez, Financial Officer",
+   zh:"敬啟者：我很高興為Nobuo Omoto先生撰寫這封推薦信。他曾在我們財務部擔任實習生，期間負責多項工作，從彙整預算報告數據到年度稽核前的文件審閱都有涉獵。Omoto先生很快就掌握了我們的例行程序，並經常提出讓工作流程更有效率的建議，其中部分建議如今已被納入部門的日常作業中。我強烈推薦Omoto先生擔任金融服務業的任何入門職位，相信他將成為貴機構的一大資產。若我能提供任何進一步協助，歡迎隨時與我聯繫。",
+   blanks:[
+     {n:135, c:["networked","applied","served","followed"], a:2, exp:"served as an intern（擔任實習生）。"},
+     {n:136, c:["gathers","gathering","having gathered","gathered"], a:1, exp:"from gathering...to reviewing，兩個並列動名詞片語。"},
+     {n:137, c:["instruments","changes","events","resources"], a:1, exp:"指他所提出的「建議／改變」被採納，選 changes。"},
+     {n:138, c:["He will be a great asset to your organization.","He will be completing his internship very soon.","I hope to work with Mr. Omoto one day.","Please send your application to me directly."], a:0, exp:"承接「強烈推薦」，說明他將成為貴機構的資產最合邏輯。"}
+   ]},
+ { id:3, range:"139–142", title:"電子郵件：Canterbury機場改建專案",
+   text:"Dear Mr. Wu,\nThank you for agreeing to consult on the Canterbury Airport redesign project. {{139}} As a result, I am particularly eager to hear your ideas about upgrading our main terminal.\nCan we meet this week? There are a number of {{140}} restaurants near my office. If you are available this Friday, we could meet at Celia's Café on Cumberland Street. I would also like a few of my colleagues to {{141}} us. They would appreciate {{142}} ways to enhance the airport user's experience.\nI look forward to hearing from you soon.\nSincerely,\nTrent Tuiloma, Chairman, Canterbury Airport Redesign Team",
+   zh:"親愛的Wu先生：感謝您答應擔任Canterbury機場改建專案的顧問。我一直很欣賞您在區域機場方面的專業表現，因此特別期待聽聽您對主航廈升級的想法。我們這週能碰面嗎？我辦公室附近有幾家不錯的餐廳，如果您週五方便，我們可以約在Cumberland街的Celia's Café。我也想邀請幾位同事一起加入，他們會很樂意一起討論如何提升機場使用者的體驗。期待盡快收到您的回覆。",
+   blanks:[
+     {n:139, c:["I can meet you when you arrive.","Scheduling flights can be quite tricky.","I have long admired your work on regional airports.","There are several dining options at the airport."], a:2, exp:"承接「感謝您擔任顧問」，說明欣賞其專業背景最能銜接下句「因此特別期待」。"},
+     {n:140, c:["excel","excellent","excellently","excelled"], a:1, exp:"形容詞 excellent 修飾名詞 restaurants。"},
+     {n:141, c:["join","pay","remind","defend"], a:0, exp:"join us（加入我們）符合語意。"},
+     {n:142, c:["to discuss","discussing","discuss","discussed"], a:1, exp:"appreciate + Ving（樂於做…）。"}
+   ]},
+ { id:4, range:"143–146", title:"電子郵件：Lindstrom大學管理證書課程",
+   text:"Dear Anna,\nOn behalf of Lindstrom University, I am writing to welcome you to the Executive Management Certificate program.\nAs a member of the incoming class, you {{143}} in an intensive yearlong curriculum. While the majority of the training takes place via online classes, the program begins with a three-day {{144}} workshop to be held on the campus of Lindstrom University from 25 to 27 May.\nPrior to the session, you will have access to course materials as well as some preliminary assignments. These assignments must be completed {{145}} the training in May. We will use this work as a starting point for the workshop. {{146}}\nMany congratulations, Anna. We look forward to seeing you in May.\nJu Hae Lee, Dean of Admission, Lindstrom University",
+   zh:"親愛的Anna：謹代表Lindstrom大學歡迎您加入高階管理證書課程。身為新一屆學員，您將參與為期一年的密集課程。雖然大部分課程採線上授課，但本課程將以一場三天的入門工作坊揭開序幕，時間為5月25日至27日，地點在Lindstrom大學校園。在工作坊之前，您將可取得課程教材以及一些預備作業，這些作業必須在5月的課程開始前完成，我們會以這些作業內容作為工作坊討論的起點。我們期望學員能認真對待每一份作業。再次恭喜您，Anna，我們五月見。",
+   blanks:[
+     {n:143, c:["participated","will be participating","have participated","have been participating"], a:1, exp:"未來將進行的課程，用未來進行式 will be participating。"},
+     {n:144, c:["introduce","introducing","introductory","introductorily"], a:2, exp:"形容詞 introductory 修飾名詞 workshop（入門工作坊）。"},
+     {n:145, c:["before","behind","despite","throughout"], a:0, exp:"must be completed before the training（須在課程開始前完成）。"},
+     {n:146, c:["You performed very well in your interview.","Your application stood out to the faculty.","Thank you for attending all of the preliminary sessions.","We expect students to give each assignment careful attention."], a:3, exp:"承接「作業將作為工作坊起點」，說明期望學員認真對待作業最合邏輯。"}
+   ]}
+];
+
+const T2P7 = [
+ { id:1, qrange:"147–148", title:"優惠券：AMS科技博物館",
+   text:"AMS — Encounters with Science and Technology\n$3 OFF — $3 off the price of one admission\nPresent this coupon at AMS and receive $3 off one general admission ticket. Limit one per household. Coupon cannot be combined with any other offers, including group rates and senior discount tickets. Valid for all permanent exhibits and galleries (not valid for featured exhibits or planetarium).\nRegular hours: Tue–Sun, 9 a.m.–5 p.m.\nSummer hours (June 12–September 5): Open every day 9 a.m.–7 p.m.",
+   zh:"AMS——科學與科技的邂逅。憑本券可享一般門票折抵3美元，每戶限用一張，不得與其他優惠（包含團體票與敬老優惠票）合併使用，適用於所有常設展覽與展廳（不適用於特展或天文館）。一般時段：週二至週日，上午9點至下午5點。夏季時段（6月12日至9月5日）：每日開放，上午9點至晚上7點。",
+   qs:[
+     {n:147, q:"What most likely is AMS?", c:["A museum","A repair facility","An electronics store","An energy provider"], a:0, exp:"文中提到 admission ticket、exhibits、galleries、planetarium，符合博物館情境。"},
+     {n:148, q:"What happens at AMS during the summer?", c:["It closes earlier.","It opens at a later time.","It is open an extra day.","It is closed for special events."], a:2, exp:"一般時段為週二至週日，夏季時段改為「每日」開放，即多開放一天（週一）。"}
+   ]},
+ { id:2, qrange:"149–150", title:"電子郵件：Archible.net部落格投稿邀約",
+   text:"Dear Ms. Masterson,\nI am a residential architect and freelance writer living in Sydney, Australia. Like so many of your archible.net blog posts, your latest one about creating architectural blueprints is full of tips that can immediately be put into practice. Your site is an incredibly useful resource, particularly for aspiring architects and those new to the profession.\nI have written for other publications about issues related to architects early in their careers. Would you allow me to contribute a guest post to your site? If so, here are some ideas I could develop:\n• Finding Mentors in Architecture\n• Steps for Learning Design Software\nI look forward to hearing from you.\nLawrence Frost",
+   zh:"親愛的Masterson女士：我是一名居住在澳洲雪梨的住宅建築師，同時也是自由撰稿人。與您archible.net部落格上的許多文章一樣，您最新一篇關於製作建築藍圖的文章充滿了可立即實踐的實用技巧。您的網站對有志成為建築師以及剛入行的新人來說，是非常實用的資源。我曾為其他刊物撰寫關於建築師職涯初期議題的文章，不知是否能讓我在您的網站上發表一篇客座文章？若可以，以下是我可以撰寫的幾個主題：尋找建築業界的導師、學習設計軟體的步驟。期待您的回覆。",
+   qs:[
+     {n:149, q:"What does Mr. Frost suggest he likes about archible.net?", c:["Its informative content","Its interactive features","Its directory of architects","Its collection of drawing tools"], a:0, exp:"他稱讚文章「充滿實用技巧」，即內容豐富實用。"},
+     {n:150, q:"What does Mr. Frost list in the e-mail?", c:["Articles he published on his own site","Posts by Ms. Masterson that he enjoyed","Problems he noticed on the Web site","Topics that he would like to write about"], a:3, exp:"信末列出的是他想撰寫的客座文章主題。"}
+   ]},
+ { id:3, qrange:"151–152", title:"課程資訊：Springfield社區學校電腦課程",
+   text:"Springfield Community School — Computer Courses\nInternet Safety — This course teaches students everything they need to navigate the Web safely.\nCourse 249800:01, Tuesday 5:30–7:30 P.M., Patrick McCann, Room 211\nCourse 249800:02, Saturday 1:00–3:00 P.M., Nora Farid, Room 166\n\nSpreadsheet Basics — This course teaches the basics of online spreadsheets. Students will learn how to create effective charts for calculating and analyzing data clearly and easily.\nCourse 225810:01, Thursday 5:30–8:30 P.M., Remi Sanders, Room 118\nCourse 225810:02, Sunday 1:00–4:00 P.M., Nora Farid, Room 315",
+   zh:"Springfield社區學校電腦課程。網路安全課程——教導學生上網所需的安全知識。課程249800:01，週二17:30–19:30，Patrick McCann，211室；課程249800:02，週六13:00–15:00，Nora Farid，166室。試算表基礎課程——教導線上試算表基礎，學生將學會如何清楚且輕鬆地製作圖表以計算與分析數據。課程225810:01，週四17:30–20:30，Remi Sanders，118室；課程225810:02，週日13:00–16:00，Nora Farid，315室。",
+   qs:[
+     {n:151, q:"Why would people enroll in the course taught by Ms. Sanders?", c:["To practice designing Web sites","To improve their Internet searches","To get tips on creating spreadsheets","To learn how to advertise on the Internet"], a:2, exp:"Remi Sanders教授「試算表基礎」課程。"},
+     {n:152, q:"What is indicated about Ms. Farid?", c:["She also teaches children.","She is Ms. Sanders' supervisor.","She teaches twice a week.","She used to work as a data analyst."], a:2, exp:"她同時教授週六的網路安全課程與週日的試算表課程，即一週授課兩次。"}
+   ]},
+ { id:4, qrange:"153–154", title:"簡訊對話：京都分店視察",
+   text:"Sally Witham [4:47 P.M.]: Hi Wakiko. I just finished up here at the Kyoto store. I'll be on the train that arrives in Tokyo at 11:35 tomorrow morning. How should I get to your location?\nWakiko Ohara [4:48 P.M.]: I'll have an associate pick you up at the station. How do things look in Kyoto?\nSally Witham [4:49 P.M.]: The Kyoto store is doing a great job. It has everything that we at the home office are looking for. Athletic shoes and sandals are displayed according to specifications, and sales associates are friendly and knowledgeable.\nWakiko Ohara [4:51 P.M.]: You should like things here, too. Do you want to begin your visit after lunch, say at 2:00?\nSally Witham [4:52 P.M.]: Sounds good. See you tomorrow.",
+   zh:"莎莉：嗨，Wakiko，我剛結束京都分店的視察，明天早上11:35會搭火車抵達東京，該怎麼去你那邊呢？Wakiko：我會請一位同仁到車站接你。京都那邊狀況如何？莎莉：京都分店做得很好，完全符合我們總公司的要求，運動鞋與涼鞋都依照規範陳列，銷售人員也親切又專業。Wakiko：這裡的狀況你應該也會滿意的，你想午餐後、大約2點開始參觀嗎？莎莉：好啊，明天見。",
+   qs:[
+     {n:153, q:"Why did Ms. Witham contact Ms. Ohara?", c:["To review sales figures","To arrange a store visit","To discuss employee performance reviews","To determine the most convenient train to take"], a:1, exp:"整段對話核心是安排前往東京分店視察的行程。"},
+     {n:154, q:'At 4:51 P.M., what does Ms. Ohara most likely mean when she writes, "You should like things here, too"?', c:["The Tokyo store is being run according to corporate policy.","Ms. Witham will find the athletic shoes she needs.","Ms. Ohara's associate is always punctual.","The Tokyo store is located next to a popular restaurant."], a:0, exp:"呼應莎莉稱讚京都分店符合總公司要求，暗示東京分店同樣符合規範。"}
+   ]},
+ { id:5, qrange:"155–157", title:"報告：Blaine River吊橋檢測",
+   text:"Structure: Blaine River Drawbridge — Location: Ridgeline Highway, KM 147\nMain span material: Steel girder — Owner: State Highway Agency\nAge of structure: 30 years — Report completed by: Vivian Tulio — Date: October 17\nNotes: The bridge is overall structurally sound. Inform Department of Transportation about small cracks in asphalt.\nBridge component / Rating — Support elements 4, Towers 4, Road surface 3, Drainage features 4, Safety barriers 5, Sidewalk or walkway 6\nKey to ratings: 1 Failed—immediate closure required; 2 Deteriorated—may fail soon; 3 Shows deterioration but still functions within acceptable parameters; 4 Shows minor wear; 5 New condition; 6 Not applicable",
+   zh:"結構：Blaine River吊橋，地點：Ridgeline公路147公里處。主跨材料：鋼樑，所有人：州公路局。橋齡：30年，報告完成人：Vivian Tulio，日期：10月17日。備註：橋樑整體結構良好，請通知運輸部路面有輕微裂縫。橋樑構件評級：支撐結構4分、橋塔4分、路面3分、排水設施4分、安全護欄5分、人行道6分（不適用）。評級說明：1分表示已失效需立即封閉；2分表示已劣化、可能很快失效；3分表示已顯現劣化但仍在可接受範圍內運作；4分表示輕微磨損；5分表示狀況如新；6分表示不適用。",
+   qs:[
+     {n:155, q:"What did Ms. Tulio most likely do?", c:["Make repairs","Hire a contractor","Perform an inspection","Authorize a construction plan"], a:2, exp:"她完成的是一份檢測報告，顯示她執行了橋樑檢查。"},
+     {n:156, q:"What part of the structure is in most need of maintenance?", c:["The support elements","The road surface","The drainage features","The safety barriers"], a:1, exp:"路面評級為3分，是所有有效評級中最低（最劣化）的部位。"},
+     {n:157, q:"What is probably true about the Blaine River Drawbridge?", c:["It was not designed for pedestrian use.","It will be closed for the month of October.","It does not have the required signage.","It is the oldest bridge on the Ridgeline Highway."], a:0, exp:"人行道評級為6分「不適用」，暗示該橋並未設有人行道，非供行人使用而設計。"}
+   ]},
+ { id:6, qrange:"158–160", title:"報導：Alma種子公司成長趨勢",
+   text:"Alma Poised for Growth\nThis month has seen a huge jump in sales of Condor PX brand wheat seed in Argentina. Last year, across much of this nation, there were above-average temperatures and below-average rainfall, causing fields to yield sharply less wheat overall. But despite the adverse weather conditions, Condor PX wheat did comparatively well.\nCondor PX was bred by Alma Seed Company in Brazil. Although Alma has been selling Condor PX through its Argentinian distributors for several years, it was slow to catch on until now. Investors also have taken notice of Alma's rapidly improving fortunes.",
+   zh:"Alma種子公司蓄勢成長。本月阿根廷Condor PX品牌小麥種子的銷售量出現大幅成長。去年該國大部分地區氣溫高於平均、降雨量低於平均，導致整體小麥田產量大幅下滑。但儘管天氣條件不利，Condor PX小麥的表現卻相對良好。Condor PX是由巴西的Alma種子公司所培育。雖然Alma多年來一直透過阿根廷的經銷商銷售Condor PX，但直到現在才真正開始受到市場青睞。投資人也已注意到Alma迅速好轉的營運狀況。",
+   qs:[
+     {n:158, q:"According to the article, what is one condition that affected wheat harvests?", c:["Excessive rain","Unusually warm weather","A shortage of wheat seeds","A loss of wheat fields"], a:1, exp:"文中提到氣溫高於平均，即異常溫暖的天氣。"},
+     {n:159, q:'The word "yield" in paragraph 1, line 5, is closest in meaning to', c:["allow","fail","follow","produce"], a:3, exp:"yield less wheat 意指「產出」較少小麥，yield 意近 produce。"},
+     {n:160, q:"According to the article, what did Alma Seed Company do?", c:["Relocate to Argentina","Purchase Condor PX","Develop a type of wheat","Invest in a new company"], a:2, exp:"Condor PX是由Alma種子公司培育（bred），即開發出一種小麥品種。"}
+   ]},
+ { id:7, qrange:"161–163", title:"電子郵件：Datoric Systems差旅報帳新制",
+   text:"Dear Staff,\nI would like to draw your attention to several new procedures regarding business trip expense reports. — [1] —. Beginning next month, business-related dining receipts must be accompanied by a listing of each dinner attendee. Also, please make sure that you do not include receipts for any non-work-related items or activities with your report. — [2] —.\nFinally, note that our accounting software will now automatically calculate for you the total to be reimbursed. You need only to upload images of your receipts for the software to do this.\nI will be happy to respond to your questions. — [3] —. However, I will be flying to Tokyo this Friday to meet clients, so I will not be checking e-mail that day. — [4] —.\nSincerely,\nSelene Hong, Assistant Director, Human Resources Department, Datoric Systems",
+   zh:"各位同仁：我想提醒大家幾項新的差旅費用報帳規定。從下個月起，與工作相關的用餐收據必須附上每位用餐者的名單。此外，請務必不要在報帳單中夾帶任何與工作無關的品項或活動收據。最後，請留意我們的會計軟體現在會自動為您計算應報銷的總金額，您只需上傳收據影像，軟體就會自動處理。我很樂意回答大家的疑問，只是我這週五將飛往東京會見客戶，當天恕無法查看電子郵件。",
+   qs:[
+     {n:161, q:"What is indicated about Datoric Systems?", c:["It has increased the spending amount allowed for business dinners.","It will adopt new procedures for filing travel expense reports.","It has office locations in several countries.","It plans to hold a company celebration."], a:1, exp:"信件主旨即為說明新的差旅報帳程序。"},
+     {n:162, q:"Why is the accounting software mentioned?", c:["To highlight a special capability it has","To encourage staff to install it","To help employees log on to it","To point out that it will be replaced"], a:0, exp:"提到軟體能自動計算報銷金額，是在強調其特殊功能。"},
+     {n:163, q:'In which of the positions marked [1], [2], [3], and [4] does the following sentence best belong?\n"Following these steps will enable us to quickly issue your reimbursement payment."', c:["[1]","[2]","[3]","[4]"], a:1, exp:"此句總結前述報帳步驟，應接在說明完報帳規定之後、轉入軟體話題之前，即位置 [2]。"}
+   ]},
+ { id:8, qrange:"164–167", title:"簡訊對話：客戶簡報排練",
+   text:"Marisa Pochon (10:37 A.M.): I was just asked by the financial officer to sit in on the firm's annual budget review. Therefore, I can't make our 3:00 P.M. meeting today.\nMamadou Albadri (10:38 A.M.): Could we practice tomorrow's client presentation earlier? What about reserving the conference room at 1:00 P.M.?\nYandong Zhang (10:39 A.M.): That would be better for me anyway. I need to leave at 4:00 P.M. for a doctor's appointment.\nMarisa Pochon (10:39 A.M.): No such luck. I'm looking at the schedule now—it's booked solid all afternoon.\nMamadou Albadri (10:40 A.M.): Then why don't you both come to my office at 2:00 P.M.? We can run through the presentation and slideshow here.\nYandong Zhang (10:41 A.M.): Sounds good. Should I get a projector from the Audiovisual Department?\nMamadou Albadri (10:42 A.M.): Don't bother. We can look at the slides on my computer screen.\nMarisa Pochon (10:43 A.M.): OK. See you later.",
+   zh:"Marisa：財務主管剛請我列席公司的年度預算審查會，所以今天下午3點的會議我無法出席。Mamadou：那我們能不能提早練習明天的客戶簡報？下午1點訂會議室如何？Yandong：那對我來說反而更好，我下午4點要去看醫生。Marisa：沒那麼幸運，我剛看了行事曆，整個下午都被排滿了。Mamadou：那你們兩位下午2點來我辦公室好嗎？我們可以在這裡走一遍簡報和投影片。Yandong：好，那我要不要去視聽部借投影機？Mamadou：不用麻煩了，我們直接看我電腦螢幕上的投影片就好。Marisa：好，待會見。",
+   qs:[
+     {n:164, q:"Why is Ms. Pochon unavailable at 3:00 P.M.?", c:["She has a phone call with important clients.","She has to give a presentation.","She has been asked to attend a meeting.","She has a medical appointment."], a:2, exp:"她被要求列席年度預算審查會議。"},
+     {n:165, q:"Why does Mr. Albadri suggest using his office?", c:["Because it can accommodate a lot of people","Because it is located near the finance office","Because his audiovisual equipment has been upgraded","Because the conference room is unavailable"], a:3, exp:"會議室下午已被訂滿，因此改到他的辦公室。"},
+     {n:166, q:'At 10:42 A.M., what does Mr. Albadri most likely mean when he writes, "Don\'t bother"?', c:["He should not be disturbed this afternoon.","Ms. Pochon should not reserve a room.","Mr. Zhang does not have to come to a meeting.","Mr. Zhang does not need to bring a projector."], a:3, exp:"承接「要不要借投影機」的提問，他表示不需要，直接用電腦螢幕即可。"},
+     {n:167, q:"When will the three people meet?", c:["At 1:00 P.M.","At 2:00 P.M.","At 3:00 P.M.","At 4:00 P.M."], a:1, exp:"最終約定在下午2點於Albadri的辦公室會面。"}
+   ]},
+ { id:9, qrange:"168–171", title:"報導：肯亞超市龍頭之爭",
+   text:"Nairobi Daily Journal — 2 April\nTwo supermarket chains are currently competing to be number one in Kenya. Both retailers, AT Mart and Duggan's, have announced that they are determined to place first with consumers. — [1] —.\nIn March, AT Mart, which is based in the United Kingdom, announced it was planning to launch its first store in Nairobi. — [2] —. It is one of the largest supermarket chains in the world.\nDuggan's, on the other hand, is not well-known outside of Africa, but it is South Africa's most dominant supermarket chain and has established a presence here. There are eight Duggan's stores in Kenya with a loyal customer base.\n— [3] —. Some supermarket chains, such as Wentworth's, which is based in the United States, have not been willing to pay what they consider to be exorbitant leasing fees when their stores simply were not attracting a significant number of shoppers. As a result, Wentworth's closed all three of its stores after only two years in Kenya.\nDuggan's, however, has an advantage. — [4] —. The company created its own real estate division, D Properties Ltd. This company has built four shopping complexes with Duggan's as the main tenant in each. Moreover, Duggan's has paid special attention to tailoring its product inventory to the local culture. It also has developed an effective supply-and-delivery system to service its famous on-site bakeries, butcher shops, and produce sections. AT Mart may have much wider name recognition, but it will need to be more innovative to compete against the popular Duggan's.\n--Susan Kotter, Staff Reporter",
+   zh:"奈洛比日報，4月2日。目前有兩大連鎖超市正在肯亞市場競爭龍頭地位。AT Mart與Duggan's兩家零售商都表明決心要在消費者心中拔得頭籌。三月，總部位於英國的AT Mart宣布計劃在奈洛比開設首間分店，該公司是全球最大的連鎖超市之一。另一方面，Duggan's在非洲以外地區並不知名，但它是南非最具主導地位的連鎖超市，並已在此地建立據點，目前在肯亞有八間分店，擁有一群忠實顧客。部分連鎖超市，例如總部位於美國的Wentworth's，由於門市無法吸引足夠顧客，卻又不願支付他們認為過高的租賃費用，結果Wentworth's在進駐肯亞僅兩年後便關閉了旗下全部三間門市。相較之下，Duggan's則具備優勢：該公司成立了自己的房地產部門D Properties Ltd.，已興建四座購物中心並以Duggan's作為每座的主要承租戶。此外，Duggan's也特別注重依當地文化調整商品庫存，並建立了高效的供應配送系統，以支援其知名的門市烘焙坊、肉舖與生鮮區。AT Mart或許擁有更高的知名度，但仍須展現更多創新，才能與廣受歡迎的Duggan's競爭。",
+   qs:[
+     {n:168, q:"What is the article mainly about?", c:["Business strategies that work well","The competition within an industry","Places to find bargains in Kenya","The growth of new shopping malls"], a:1, exp:"全文主軸是兩大超市在肯亞市場的競爭。"},
+     {n:169, q:"What is indicated about Wentworth's?", c:["It has a loyal customer base.","Its branch stores were mostly in South Africa.","Its business in Kenya was relatively short-lived.","It is a family-owned enterprise."], a:2, exp:"該公司進駐肯亞僅兩年便關閉所有門市，經營時間相對短暫。"},
+     {n:170, q:"What is NOT mentioned as an accomplishment of Duggan's?", c:["Establishing a real estate division","Creating an efficient delivery system","Setting up on-site bakeries","Developing a global reputation"], a:3, exp:"文中提到Duggan's在非洲以外並不知名，因此「建立全球聲譽」並非其成就。"},
+     {n:171, q:'In which of the positions marked [1], [2], [3], and [4] does the following sentence best belong?\n"Rents in desirable locations for supermarkets are often extremely high."', c:["[1]","[2]","[3]","[4]"], a:2, exp:"此句說明地段租金高昂，應緊接於其後舉出Wentworth's因租金過高而退出的例子，即位置 [3]。"}
+   ]},
+ { id:10, qrange:"172–175", title:"信件：Small Business Challenge決賽入圍通知",
+   text:"Dear Ms. Chelvi,\nWe are delighted to inform you that you have been nominated as a finalist for the Small Business Challenge competition this year. Now in its fifth year, this competition is designed to highlight innovative products and services launched by young entrepreneurs. The Web application that you developed, which provides a means of matching charitable organizations with volunteers, earned one of the top scores from our panel of judges.\nIn the next round of the challenge, you will participate in a live presentation about your product before a panel of expert judges. The three people with the best presentations will receive one-time grants of MYR 10,000 each to invest in their businesses.\nPlease go to sbc.org/competition and submit an outline of your presentation, a brief video that clearly illustrates the use of your application, and a passport-sized photograph of yourself. You will also need to sign a consent form allowing us to use your name and photo, if needed, in promotional materials on our Web site. The deadline for submission of these materials is 10 March.\nBest regards,\nFelix Pang, Chairperson, Small Business Challenge Committee",
+   zh:"親愛的Chelvi女士：我們很高興通知您，您已獲提名為今年度Small Business Challenge競賽的決賽入圍者。本競賽今年邁入第五屆，旨在表揚年輕創業者所推出的創新產品與服務。您所開發的網頁應用程式提供了媒合慈善機構與志工的方式，在我們評審團的評分中名列前茅。在下一輪競賽中，您將於專家評審團面前進行產品的現場簡報。簡報表現最佳的三位參賽者，將各獲得一次性獎助金馬幣10,000元，用於投資自己的事業。請至sbc.org/competition提交您的簡報大綱、一支能清楚展示您應用程式使用方式的短片，以及一張護照規格的個人照片。您也需要簽署一份同意書，允許我們在需要時將您的姓名與照片用於本網站的宣傳資料中。以上資料的送件截止日期為3月10日。",
+   qs:[
+     {n:172, q:"What is the purpose of the letter?", c:["To seek volunteers for an event","To notify a contest finalist","To sell business consultation services","To offer a small-business loan"], a:1, exp:"信件主旨是通知她已入圍決賽。"},
+     {n:173, q:"What does Ms. Chelvi most likely specialize in?", c:["Law","Technology","Finance","Marketing"], a:1, exp:"她開發了一款網頁應用程式，顯示她的專長在科技領域。"},
+     {n:174, q:'The word "illustrates" in paragraph 3, line 2, is closest in meaning to', c:["represents","translates","lightens","decorates"], a:0, exp:"clearly illustrates the use 意指「清楚呈現／展示」使用方式，illustrates 意近 represents。"},
+     {n:175, q:"What is Ms. Chelvi asked to do by March 10?", c:["Update a Web page design","Give a presentation","Sign a consent form","Pay a fee"], a:2, exp:"信中要求她在3月10日前提交資料並簽署同意書。"}
+   ]},
+ { id:11, qrange:"176–180", title:"信件與訂單確認：Two Swan Press版稅通知",
+   text:"Two Swan Press, 72 Holywell Road, Edinburgh EH8 8PJ — 4 December\nDear Mr. Morello:\nEnclosed please find your royalty payment for Understanding Our Oceans. You should have recently received an e-mail that listed the sales figures and the royalties due to you for the print and electronic versions of your book.\nWe are proud to announce that Two Swan Press was given the Publisher of the Year Award by the UK Book Industry in October. We thank the authors who have worked with us since our founding five years ago.\nAll Two Swan Press authors are entitled to an author discount of 40 percent off any title on our Web site. Simply use the code AUX1417 for your discount.\nIf you have any questions at all, please do not hesitate to contact me.\nKind regards,\nSarah Wicklin\n\nhttps://www.twoswanpress.co.uk/orderconfirmation\nTHANK YOU FOR YOUR ORDER! Special December Offer—free shipping on all orders over £35\nName: Duncan Booth — Date of purchase: 12 December\nShip to: Duncan Booth, 321 Maslin St., Coatbridge ML5 1LZ, Scotland, UK\n1 Business in Our Lives by Elaine Schuyler £75.00\nDiscount Applied (AUX1417) −£30.00\nBalance Due £45.00 — Paid by Credit Card ****5732\nItems from multiple orders may be combined in the same package. We will notify you when your order has shipped.",
+   zh:"Two Swan Press出版社，12月4日。親愛的Morello先生：隨函附上您《Understanding Our Oceans》一書的版稅款項。您應該已在近期收到一封電子郵件，列出該書紙本與電子版的銷售數字及應得版稅。我們很自豪地宣布，Two Swan Press於10月榮獲英國圖書業「年度最佳出版社」獎項，並感謝自五年前創社以來與我們合作的所有作者。所有Two Swan Press的作者都有權在本社網站購買任何書籍時享有四折優惠，只需使用優惠碼AUX1417即可折抵。如有任何問題，歡迎隨時與我聯繫。\n\n訂單確認網頁：感謝您的訂購！12月特別優惠——訂單滿35英鎊即享免運。姓名：Duncan Booth，購買日期：12月12日。1本《Business in Our Lives》，作者Elaine Schuyler，原價75英鎊，套用優惠碼AUX1417折抵30英鎊，應付餘額45英鎊，以信用卡（末四碼5732）付款。若您有多筆訂單，商品可能會合併包裝出貨，出貨後將另行通知。",
+   qs:[
+     {n:176, q:"What is a purpose of the letter?", c:["To ask Mr. Morello to write a book","To explain an enclosed contract","To notify Mr. Morello of a payment","To describe an updated personnel policy"], a:2, exp:"信件主旨是通知他版稅款項。"},
+     {n:177, q:"What was sent in a previous message to Mr. Morello?", c:["Incorrect contact information","Detailed sales numbers","A list of suggested changes","A link to an electronic book"], a:1, exp:"信中提到先前已寄送一封列出銷售數字與版稅金額的電子郵件。"},
+     {n:178, q:"What does Ms. Wicklin mention about Two Swan Press?", c:["It moved to a new location in October.","It has launched a new program for its fifth anniversary.","It has won an industry award.","It has decided to focus on scientific publications."], a:2, exp:"信中提到出版社於10月獲得「年度最佳出版社」獎項。"},
+     {n:179, q:"What is suggested about Mr. Booth?", c:["He is a Two Swan Press author.","He wrote Business in Our Lives.","He is an acquaintance of Mr. Morello.","He has purchased items from Two Swan Press before."], a:3, exp:"訂單使用了作者專屬優惠碼，且頁面提及「多筆訂單」可能合併出貨，暗示他曾多次向該出版社購書。"},
+     {n:180, q:"What is indicated about the order?", c:["It has been delayed.","It has not yet been paid.","It contains multiple books.","It includes free shipping."], a:3, exp:"折扣後應付金額為45英鎊，超過35英鎊的免運門檻，故享有免運。"}
+   ]},
+ { id:12, qrange:"181–185", title:"電子郵件：Meridivect訂單與會員方案",
+   text:"Dear Ms. Reynolds,\nThank you for placing your order with Meridivect. I hope the Trimagine monitor you purchased will bring you many years of enjoyment. Your purchase is currently scheduled to ship on Monday, 5 June, and will be delivered between 9 June and 13 June. Attached please find a copy of the invoice.\nI would like to take this opportunity to invite you to join our popular Meridivect Plus Programme (MPP). For an annual fee of £50, you will qualify for the following benefits: a 5 percent discount on all purchases, complimentary two-day shipping, and members-only coupons valid towards many of our weekly specials. In addition, you will get access to free and discounted online movie streaming with our corporate partner Watchscape.\nTo qualify immediately for these benefits, join our rewards programme by 4 p.m. tomorrow. If you do so, your order is guaranteed for delivery on 6 June rather than within the time frame specified above, and you will also be receiving a special thank-you gift.\nThank you for being a valued Meridivect customer for the last seven years.\nSincerely,\nLogan Hinesbury, Customer Service Representative\n\nDear Mr. Hinesbury,\nYes, thanks, I would like to become an MPP member. Please charge the amount to my credit card, which you have on file. Also, please note that my address on the invoice is listed as 312 Pine Road rather than 321 Pine Road. Please make the necessary correction so that I can receive the order on the day specified in your offer.\nThank you,\nBettina Reynolds",
+   zh:"親愛的Reynolds女士：感謝您向Meridivect下訂，希望您購買的Trimagine螢幕能為您帶來多年愉快的使用體驗。您的訂單目前預定於6月5日（週一）出貨，並將於6月9日至13日間送達，隨信附上發票副本。藉此機會邀請您加入我們廣受歡迎的Meridivect Plus會員方案（MPP）。只需年費50英鎊，即可享有以下權益：所有購物享95折優惠、免費兩日到貨、以及可用於多項每週特價的會員專屬優惠券；此外，還可透過合作夥伴Watchscape享有免費及優惠的線上電影串流服務。若您想立即享有這些權益，請於明日下午4點前加入我們的會員方案，屆時您的訂單將保證於6月6日送達（優於原訂時程），並將額外獲得一份感謝小禮。感謝您七年來一直是Meridivect的重要顧客。\n\n回信：親愛的Hinesbury先生：好的，謝謝，我願意加入MPP會員。請將費用刷至您留存的信用卡。另外，請注意發票上的地址寫成Pine Road 312號，但正確應為321號，麻煩協助更正，以便我能在您所承諾的日期收到訂單。謝謝。",
+   qs:[
+     {n:181, q:"What is one reason why the first e-mail was sent?", c:["To announce a delay in delivery","To advertise a new product","To introduce a new service","To promote a special customer benefit"], a:3, exp:"信件邀請她加入MPP會員方案，即宣傳一項特別的顧客優惠。"},
+     {n:182, q:"What is NOT mentioned as a feature of the Meridivect Plus Programme?", c:["Membership with an online movie service","Free shipping on purchases","Access to an online music library","Discounts on merchandise"], a:2, exp:"信中只提到線上電影串流，並未提及音樂圖書館服務。"},
+     {n:183, q:"What is indicated about Ms. Reynolds?", c:["She recently moved to a new address.","She has been a Meridivect customer for several years.","She is already a Watchscape customer.","She makes most of her purchases online."], a:1, exp:"信末提到她已是Meridivect七年來的重要顧客。"},
+     {n:184, q:"When will Ms. Reynolds' order arrive?", c:["On June 2","On June 6","On June 9","On June 13"], a:1, exp:"她已在期限內加入會員方案，因此訂單保證於6月6日送達。"},
+     {n:185, q:"What problem does Ms. Reynolds report?", c:["She could not open the attached invoice.","She did not receive any coupons.","Her credit card has been canceled.","Her house number was listed incorrectly."], a:3, exp:"她指出發票上的門牌號碼寫錯，應為321號而非312號。"}
+   ]},
+ { id:13, qrange:"186–190", title:"電子郵件、表單與電子報：Broadside電子公司導師計畫",
+   text:"To: All Staff\nFrom: Personnel Department\nSubject: Mentoring Program\n\nEmployees who have been with Broadside Electronics for less than eighteen months are invited to apply to participate in a new mentoring program that will match a maximum of ten junior employees with long-term company veterans. The goal is that junior employees will sharpen corporate skills, better understand company culture, and develop a more focused career path. Mentees will be assigned to a mentor based strictly on their work assignment and professional interests. The pairs will meet at mutually convenient times throughout the year, from three to five hours per month.\nTo be considered for participation in this initiative, complete the attached application and return to Mentoring Program Director Tim Wrigley by July 1. Mr. Wrigley will send notification of his selections by July 15.\n\nMENTORING PROGRAM APPLICATION\nName: Cara Drummond — Extension: 144 — Division: Sales\nProfessional areas of interest: I am most interested in learning about our markets abroad and developing my sales-presentation abilities for these international markets. I am also interested in general career guidance.\nBest workdays and times for meeting: Any weekday morning except Monday.\n\nThe Broadside Company Newsletter — Mentoring Program Sees Results\nLong-time employee and Vice President of Sales Alena Russo was intrigued when a Personnel Department director approached her about mentoring a less experienced employee under a program that began last year. She is glad to have accepted the assignment. \"After working with Ms. Drummond, I am more satisfied with my own duties, because I know I have helped a professional who is just getting started. I only wish that I had had someone look out for me in my early years,\" remarked Ms. Russo.\nMs. Drummond explains that she \"needed pointers on how to make better sales pitches.\" She reports that her sales are up 20 percent now. She better understands the opportunities Broadside Electronics has to offer and what is required to become a manager. \"Thanks to Ms. Russo, I have been able to define my career goals, and I am a happier person when I arrive to work every day.\"\nNew mentorship pairs are now being formed. Interested parties should contact Tim Wrigley in the Personnel Department.",
+   zh:"致全體員工，發信人：人事部，主旨：導師計畫。任職Broadside電子公司未滿十八個月的員工，即日起可申請參加一項新的導師計畫，最多將媒合十位資淺員工與資深員工夥伴。此計畫目的是讓資淺員工精進職場技能、更了解公司文化，並發展更明確的職涯方向。受輔導者將依其工作內容與專業興趣，被嚴格配對至合適的導師。配對雙方將於全年依雙方方便的時間會面，每月三至五小時。若欲申請參加，請填寫附件申請表，並於7月1日前交回導師計畫主任Tim Wrigley，他將於7月15日前通知遴選結果。\n\n申請表：姓名Cara Drummond，分機144，部門：業務。專業興趣領域：我最想學習關於海外市場的知識，並提升我在國際市場的業務簡報能力，同時也希望獲得一般性的職涯建議。可會面的最佳工作日與時段：除週一外的平日上午。\n\nBroadside公司電子報——導師計畫成效顯著。資深員工暨業務副總裁Alena Russo去年在人事部主管邀請她輔導一位資淺員工時，感到相當有興趣，她也很高興接下這項任務。「與Drummond女士共事後，我對自己的工作更有成就感，因為我知道自己幫助了一位剛起步的專業人士。我只希望自己剛入行時也有人這樣照顧我，」Russo表示。Drummond女士則說明她「需要一些讓銷售簡報更好的訣竅」，如今她的業績已成長20%。她也更了解Broadside電子公司所提供的機會，以及升任管理職所需具備的條件。「多虧了Russo女士，我得以確立自己的職涯目標，現在每天上班都感到更快樂，」她說。新一輪的導師配對正在進行中，有興趣者請洽人事部的Tim Wrigley。",
+   qs:[
+     {n:186, q:"What does the e-mail indicate about the mentoring program?", c:["It is popular industry-wide.","The number of participants is limited.","It is designed for staff in the sales division.","Participants must attend an orientation meeting."], a:1, exp:"信中提到最多媒合十位資淺員工，顯示名額有限。"},
+     {n:187, q:"How will the junior employees most likely be selected?", c:["They will be chosen from a management-training group.","They will undergo competitive interviews.","They will be evaluated by Mr. Wrigley.","They will be recommended by a local business school."], a:2, exp:"Wrigley將負責審核申請並發布遴選結果通知。"},
+     {n:188, q:"What is suggested about Ms. Drummond?", c:["She has worked at Broadside Electronics for less than eighteen months.","She has just transferred from another department.","She has received a positive annual review.","She has made many successful presentations abroad."], a:0, exp:"此計畫僅開放任職未滿十八個月的員工申請，而Drummond是受輔導的一方，符合此資格。"},
+     {n:189, q:"What is most likely true about Ms. Russo?", c:["She is planning to retire soon.","She has international sales experience.","She has mentored many junior employees.","She recently joined the hiring team."], a:1, exp:"Drummond希望學習海外市場與國際業務簡報，而Russo正是輔導她這方面能力的導師，暗示Russo具備國際業務經驗。"},
+     {n:190, q:"What benefit from the mentoring program have both Ms. Drummond and Ms. Russo enjoyed?", c:["Increased job satisfaction","Quick promotions","Paycheck bonuses","Clearer career goals"], a:0, exp:"Russo提到「對自己的工作更有成就感」，Drummond提到「每天上班都感到更快樂」，兩者皆指向工作滿意度提升。"}
+   ]},
+ { id:14, qrange:"191–195", title:"排程、電子郵件與報導：Bartowsky Manufacturing試產案",
+   text:"Bartowsky Manufacturing — Production Trial-Run Schedule — Product: Guadiana Office Chair\nSunday 8 July: David Mateja arrives in Bilgoraj\nMonday 9 July: Preproduction setup of machinery; Calibrating and adjusting equipment to designated specifications\nTuesday 10 July: Production and assembly of parts\nWednesday 11 July: Durability tests (weight, resistance, and material quality)\nThursday 12 July: David Mateja departs for Bratislava\n\nDear Ms. Hammond,\nI have an update about the Guadiana trial run at Bartowsky Manufacturing. I am happy to report that the factory is capable of manufacturing the chairs per our design specifications, and the estimated production costs suggest this would be a viable partnership.\nOn Monday, I supervised the calibration of the equipment, and the next day, during the trial run, I noticed that the paint that was used to coat the metal elements did not meet our specifications. They were recoated immediately after I pointed out the problem. There were no other issues. The chair was tested on Wednesday and passed all tests.\nToday, I discussed our production schedule by telephone with Martin Havranec, explaining that our distribution policy requires that the chairs be available at all retail locations on the release date. He assured me that expedited delivery would be available for some customers if Bartowsky Manufacturing was prepared to make a significant investment.\nDavid Mateja\n\nPolish Firm Wins Nostilde Contract — 22 July\nBartowsky Manufacturing, based in Bilgoraj, Poland, has secured a contract to produce office chairs for the international furniture brand Nostilde.\nNostilde plans to deliver an estimated 200,000 chairs to all its stores in the European Union. This is the largest order in Bartowsky's history. In order to meet the demand, the company pledged to invest in additional equipment to increase the factory's production capacity.\n\"We've been contemplating a large-scale equipment purchase for a couple of years,\" explained Bartowsky Manufacturing president Martin Havranec. \"We have the space and an available labour pool. Once the new equipment is in place, we will be able to put many skilled applicants to work immediately.\"",
+   zh:"Bartowsky製造公司——生產試產排程——產品：Guadiana辦公椅。7月8日（週日）：David Mateja抵達Bilgoraj；7月9日（週一）：機台前置設置、依指定規格校準調整設備；7月10日（週二）：零件生產與組裝；7月11日（週三）：耐用度測試（重量、耐受度、材質品質）；7月12日（週四）：David Mateja啟程前往布拉提斯拉瓦。\n\n親愛的Hammond女士：關於Bartowsky製造公司Guadiana椅試產案，我有以下最新進度回報。很高興向您報告，該工廠有能力依照我們的設計規格製造這款椅子，且估計的生產成本顯示這將是一個可行的合作案。週一，我監督了設備的校準作業；隔天試產過程中，我發現用於塗裝金屬部件的漆料不符合我們的規格，經我指出問題後已立即重新上漆，並無其他問題。這批椅子已於週三完成測試並全數通過。今天，我與Martin Havranec電話討論了生產排程，向他說明我們的配銷政策要求所有零售據點須在上市日當天同步供貨。他向我保證，只要Bartowsky製造公司願意投入大筆資金，即可為部分客戶提供加急出貨服務。\n\n波蘭廠商拿下Nostilde訂單——7月22日。總部位於波蘭Bilgoraj的Bartowsky製造公司，已取得國際家具品牌Nostilde辦公椅的生產合約。Nostilde計劃將約20萬張椅子配送至歐盟境內所有分店，這是Bartowsky史上最大的一筆訂單。為滿足此需求，該公司承諾投資額外設備以提升工廠產能。「我們幾年前就一直在考慮進行大規模設備採購，」Bartowsky製造公司總裁Martin Havranec表示。「我們有場地，也有可運用的勞動力，一旦新設備到位，我們就能立即讓許多具備技能的應徵者上工。」",
+   qs:[
+     {n:191, q:"According to the schedule, what happened on July 9?", c:["Specifications were printed.","Machines were adjusted.","Personnel were trained.","Quality was tested."], a:1, exp:"排程表顯示7月9日（週一）進行設備校準與調整。"},
+     {n:192, q:"What does Mr. Mateja suggest about production costs?", c:["They will be confirmed by Mr. Havranec.","They were difficult to negotiate.","They have been revised.","They are acceptable."], a:3, exp:"他表示估計的生產成本顯示這將是可行的合作案，即成本可被接受。"},
+     {n:193, q:"When did Mr. Mateja most likely request a change to meet specifications?", c:["On July 8","On July 10","On July 11","On July 12"], a:1, exp:"他在週二（7月10日）試產過程中發現漆料問題並要求重新上漆。"},
+     {n:194, q:"What was Mr. Mateja promised on July 13?", c:["That Bartowsky Manufacturing would purchase additional production equipment","That expedited delivery would be available for some customers","That production of the Nostilde chairs would start immediately","That most materials would be sourced in Poland"], a:1, exp:"Havranec向他保證，若公司願意投入資金，即可提供加急出貨服務。"},
+     {n:195, q:"What does Mr. Havranec suggest about Bartowsky Manufacturing?", c:["It has produced items for Nostilde before.","It designed a chair exclusively for Nostilde.","It will easily find qualified workers.","It will repair a section of the factory."], a:2, exp:"他表示公司有可運用的勞動力，新設備到位後能立即讓具技能的應徵者上工，暗示能輕易找到合格人力。"}
+   ]},
+ { id:15, qrange:"196–200", title:"電子郵件、傳單與賽程：San Jose Starlings團體出遊",
+   text:"To: Daniel Rodrigues Pereira\nFrom: Livia Romero\nSubject: Company outing\nDate: August 5\n\nHello Daniel,\nI hope you are settling in well. I'm sure you have had a busy few weeks. Around this time of year, the office manager typically begins arranging our annual company outing. I think we mentioned this during your interview in June. Previously, we have done things like going to a concert and taking a local river cruise. The outing is always great for morale, and everyone looks forward to it.\nThis year, I think it would be a good idea to get tickets to a sporting event. I know that many staff members are fans of the San Jose Starlings baseball team. It should be an evening game when the team is playing at home. Looking at the ticket prices, it seems that we will be just enough to get a ticket for every staff member this year.\nI'm sure Elise can assist you with this; she has often helped organize the outings. Let me know if you have any questions.\nBest,\nLivia Romero, Director of Administration, Loftgren Consulting\n\nPlan your next event with the San Jose Starlings!\nDiscounted tickets are available for groups of ten or more. The more tickets you buy, the more you save—perfect for family gatherings, company outings, or charity fund-raisers! Get perks such as free tickets for the organizer, discounts on food, and your group's name displayed on the scoreboard.\nGroup Ticket Pricing: 10 tickets $130.00 / 30 tickets $360.00 / 50 tickets $550.00 / 70 tickets $700.00\nContact grouptickets@sanjosestarlings.com or call 408-555-0101 for more information.\n\nSan Jose Starlings August Schedule\nAugust 13, Sunday, 1:05 P.M., Aspen Monarchs, Home\nAugust 15, Tuesday, 7:05 P.M., Aspen Monarchs, Home\nAugust 19, Saturday, 1:05 P.M., Philipsburg Pinstripes, Away\nAugust 22, Tuesday, 7:05 P.M., Philipsburg Pinstripes, Away\nPurchase tickets online at www.sanjosestarlings.com/tickets.",
+   zh:"致Daniel Rodrigues Pereira，發信人Livia Romero，主旨：員工出遊。哈囉Daniel，希望你已經適應得不錯，這幾週想必相當忙碌。每年這個時候，辦公室經理通常會開始籌辦我們的年度員工出遊活動，我記得六月面試時我們有提過這件事。過去我們辦過的活動包括看演唱會、搭乘當地的河輪遊覽，這類出遊活動對提振士氣一向很有幫助，大家也都很期待。今年我認為買運動賽事的門票會是個不錯的主意，我知道很多同仁都是San Jose Starlings棒球隊的球迷，應該安排一場該隊主場的晚間賽事。看了票價之後，今年的預算應該剛好足夠讓每位員工都能拿到一張票。我相信Elise可以協助你處理這件事，她過去經常協助籌辦出遊活動。有任何問題歡迎讓我知道。\n\n傳單：與San Jose Starlings一起規劃您的下一場活動！十人以上團體可享優惠票價，買越多、省越多，非常適合家庭聚會、公司出遊或慈善募款活動！還可享有主辦人免費入場、餐飲折扣，以及在計分板上顯示您團體的名稱等福利。團體票價：10張130美元／30張360美元／50張550美元／70張700美元。\n\nSan Jose Starlings八月賽程：8月13日（週日）13:05主場對戰Aspen Monarchs；8月15日（週二）19:05主場對戰Aspen Monarchs；8月19日（週六）13:05客場對戰Philipsburg Pinstripes；8月22日（週二）19:05客場對戰Philipsburg Pinstripes。",
+   qs:[
+     {n:196, q:"Why did Ms. Romero send the e-mail to Mr. Rodrigues Pereira?", c:["To tell him about an upcoming budget cut","To invite him to a concert","To introduce him to his new assistant","To ask him to arrange an event"], a:3, exp:"信件目的是請他籌辦年度員工出遊活動。"},
+     {n:197, q:"What does the e-mail imply about Mr. Rodrigues Pereira?", c:["He recently attended a San Jose Starlings game.","He will be leaving in a few weeks to go on vacation.","He is a professional party planner.","He recently began working for Loftgren Consulting."], a:3, exp:"信中提到「希望你已經適應得不錯」及「六月面試時提過」，暗示他是新進員工。"},
+     {n:198, q:"According to the flyer, what is a benefit of buying tickets as a group?", c:["Reduced ticket prices","Free food","Front-row seating","T-shirts with the team's logo"], a:0, exp:"傳單標題即說明「買越多、省越多」，即團體優惠價格。"},
+     {n:199, q:"How many employees does Loftgren Consulting likely have?", c:["10","30","50","70"], a:2, exp:"信中提到預算「剛好足夠」讓每位員工都拿到一張票；對照票價表，$600的預算最符合50張（$550）的方案。"},
+     {n:200, q:"On what date could Loftgren Consulting employees attend a game?", c:["August 13","August 15","August 19","August 22"], a:1, exp:"信中指定須為主場的「晚間」賽事，符合條件的只有8月15日（19:05主場）。"}
+   ]}
+];
+
+/* ============ RENDER ============ */
+const TESTS = { test1:{P5:T1P5,P6:T1P6,P7:T1P7}, test2:{P5:T2P5,P6:T2P6,P7:T2P7} };
+const state = {
+  test1:{p5:{},p6:{},p7:{}},
+  test2:{p5:{},p6:{},p7:{}}
+};
+let currentTest = 'test1';
+let currentPart = 'p5';
+
+function highlight(text){
+  let html = text.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  const words = Object.keys(VOCAB).sort((a,b)=>b.length-a.length);
+  words.forEach(w=>{
+    const disp = w.replace(/[-\s]/g,m=>"\\"+m);
+    const re = new RegExp("\\b("+disp+")\\b","gi");
+    html = html.replace(re, (m)=>`<span class="vocab" onclick="openVocab('${w.replace(/'/g,"\\'")}')">${m}</span>`);
+  });
+  return html.replace(/\n/g,"<br>");
+}
+
+function openVocab(key){
+  const v = VOCAB[key];
+  if(!v) return;
+  document.getElementById('vocabContent').innerHTML = `
+    <h3>${key.replace(/-/g,' ')}</h3>
+    <div class="pos">${v.pos}</div>
+    <div class="zh">${v.zh}</div>
+    <div class="ex-en">"${v.ex}"</div>
+    <div class="ex-zh">${v.exZh}</div>`;
+  document.getElementById('vocabPanel').classList.add('open');
+  document.getElementById('vocabOverlay').classList.add('open');
+}
+function closeVocab(){
+  document.getElementById('vocabPanel').classList.remove('open');
+  document.getElementById('vocabOverlay').classList.remove('open');
+}
+document.getElementById('vocabOverlay').addEventListener('click', closeVocab);
+
+function choose(part, qid, idx, correctIdx, btnGroupId){
+  const st = state[currentTest][part];
+  if(st[qid] !== undefined) return;
+  st[qid] = idx;
+  const group = document.getElementById(btnGroupId);
+  [...group.children].forEach((btn,i)=>{
+    btn.disabled = true;
+    if(i===correctIdx) btn.classList.add('correct');
+    else if(i===idx) btn.classList.add('wrong');
+  });
+  const exp = group.parentElement.querySelector('.explain');
+  if(exp) exp.style.display='block';
+  updateScore(part);
+}
+
+function updateScore(part){
+  const el = document.getElementById('score-'+part);
+  if(!el) return;
+  let total=0, correct=0;
+  const data = TESTS[currentTest];
+  const st = state[currentTest][part];
+  if(part==='p5'){
+    data.P5.forEach(q=>{ total++; if(st[q.n]===q.a) correct++; });
+  } else if(part==='p6'){
+    data.P6.forEach(t=>t.blanks.forEach(b=>{ total++; if(st[b.n]===b.a) correct++; }));
+  } else if(part==='p7'){
+    data.P7.forEach(t=>t.qs.forEach(q=>{ total++; if(st[q.n]===q.a) correct++; }));
+  }
+  el.textContent = `已答對 ${correct} / 已作答 ${Object.keys(st).length} / 共 ${total} 題`;
+}
+
+function renderP5(){
+  const data = TESTS[currentTest].P5;
+  let h = `<div class="section-title">Part 5 － 單句填空<span class="score" id="score-p5">尚未作答</span></div>
+  <div class="directions">每題句子中缺少一個單字或片語，請從四個選項中選出最適合的答案。點擊選項後會立即顯示正確答案與簡要解析。</div>`;
+  data.forEach(q=>{
+    const gid = currentTest+'p5g'+q.n;
+    h += `<div class="card">
+      <div class="sentence"><span class="qnum">${q.n}.</span>${highlight(q.s.replace('___','_____'))}</div>
+      <div class="choices" id="${gid}">
+        ${q.c.map((c,i)=>`<button class="choice-btn" onclick="choose('p5',${q.n},${i},${q.a},'${gid}')">(${String.fromCharCode(65+i)}) ${c}</button>`).join('')}
+      </div>
+      <div class="explain">💡 ${q.exp}</div>
+    </div>`;
+  });
+  return h;
+}
+
+function renderP6(){
+  const data = TESTS[currentTest].P6;
+  let h = `<div class="section-title">Part 6 － 短文填空<span class="score" id="score-p6">尚未作答</span></div>
+  <div class="directions">閱讀短文，文中有四處空格，請選出最適合的答案。可點選文章中橘色底線的單字查看解釋，或按下方按鈕顯示整段中文翻譯。</div>`;
+  data.forEach(t=>{
+    let text = t.text;
+    const blankSpans = {};
+    t.blanks.forEach(b=>{ blankSpans[b.n]=`<span class="blank-tag">${b.n}</span>`; });
+    text = text.replace(/\{\{(\d+)\}\}/g, (m,n)=>blankSpans[n]);
+    h += `<div class="passage-box">
+      <div class="passage-title">Questions ${t.range} · ${t.title}</div>
+      <div class="passage-text">${highlight(text)}</div>
+    </div>
+    <div class="toolbar">
+      <button class="tbtn" onclick="toggleZh('${currentTest}p6zh${t.id}')">顯示 / 隱藏中文翻譯</button>
+    </div>
+    <div class="zh-block" id="${currentTest}p6zh${t.id}">${t.zh}</div>`;
+    t.blanks.forEach(b=>{
+      const gid = currentTest+'p6g'+b.n;
+      h += `<div class="card sub-q">
+        <div class="sentence"><span class="qnum">${b.n}.</span></div>
+        <div class="choices" id="${gid}">
+          ${b.c.map((c,i)=>`<button class="choice-btn" onclick="choose('p6',${b.n},${i},${b.a},'${gid}')">(${String.fromCharCode(65+i)}) ${c}</button>`).join('')}
+        </div>
+        <div class="explain">💡 ${b.exp}</div>
+      </div>`;
+    });
+  });
+  return h;
+}
+
+function renderP7(){
+  const data = TESTS[currentTest].P7;
+  let h = `<div class="section-title">Part 7 － 閱讀理解<span class="score" id="score-p7">尚未作答</span></div>
+  <div class="directions">閱讀下列文章並回答問題。可點選文章中橘色底線的單字查看解釋，或按下方按鈕顯示整段中文翻譯。</div>`;
+  data.forEach(t=>{
+    h += `<div class="passage-box">
+      <div class="passage-title">Questions ${t.qrange} · ${t.title}</div>
+      <div class="passage-text">${highlight(t.text)}</div>
+    </div>
+    <div class="toolbar">
+      <button class="tbtn" onclick="toggleZh('${currentTest}p7zh${t.id}')">顯示 / 隱藏中文翻譯</button>
+    </div>
+    <div class="zh-block" id="${currentTest}p7zh${t.id}">${t.zh}</div>`;
+    t.qs.forEach(q=>{
+      const gid = currentTest+'p7g'+q.n;
+      h += `<div class="card sub-q">
+        <div class="sentence"><span class="qnum">${q.n}.</span>${highlight(q.q)}</div>
+        <div class="choices" id="${gid}">
+          ${q.c.map((c,i)=>`<button class="choice-btn" onclick="choose('p7',${q.n},${i},${q.a},'${gid}')">(${String.fromCharCode(65+i)}) ${c}</button>`).join('')}
+        </div>
+        <div class="explain">💡 ${q.exp}</div>
+      </div>`;
+    });
+  });
+  return h;
+}
+
+function renderPatterns(){
+  let h = `<div class="section-title">常用句型參考</div>
+  <div class="directions">以下句型取材自 Test 1 / Test 2 文章中反覆出現、值得學起來的實用句型與搭配用法。</div>`;
+  PATTERNS.forEach(p=>{
+    h += `<div class="pattern-card">
+      <div class="pattern-en">${p.en}</div>
+      <div class="pattern-zh">${p.zh}</div>
+      <div class="pattern-ex">${highlight(p.ex)}</div>
+      <div class="pattern-exzh">${p.exZh}</div>
+    </div>`;
+  });
+  return h;
+}
+
+function toggleZh(id){
+  const el = document.getElementById(id);
+  el.style.display = (el.style.display==='block') ? 'none' : 'block';
+}
+
+const renderers = { p5:renderP5, p6:renderP6, p7:renderP7 };
+
+function renderMain(){
+  if(currentTest==='patterns'){
+    document.getElementById('main').innerHTML = renderPatterns();
+    document.getElementById('partTabs').style.display='none';
+    return;
+  }
+  document.getElementById('partTabs').style.display='flex';
+  document.getElementById('main').innerHTML = renderers[currentPart]();
+  updateScore(currentPart);
+}
+
+document.getElementById('testTabs').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  currentTest = e.target.dataset.test;
+  document.querySelectorAll('#testTabs button').forEach(b=>b.classList.toggle('active', b.dataset.test===currentTest));
+  renderMain();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+document.getElementById('partTabs').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  currentPart = e.target.dataset.part;
+  document.querySelectorAll('#partTabs button').forEach(b=>b.classList.toggle('active', b.dataset.part===currentPart));
+  renderMain();
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+renderMain();
+</script>
+</body>
+</html>
