@@ -248,6 +248,52 @@
     padding:30px 10px 50px;
   }
   .empty-vocab{opacity:.6;font-size:.85rem;margin-top:20px;}
+  .speak-row{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 4px;}
+  .speak-btn{
+    font-family:sans-serif;
+    font-size:.76rem;
+    background:rgba(250,247,240,.1);
+    color:var(--paper);
+    border:1px solid rgba(250,247,240,.35);
+    border-radius:14px;
+    padding:4px 10px;
+    cursor:pointer;
+  }
+  .speak-btn:hover{background:rgba(250,247,240,.2);}
+  .speak-btn.playing{background:var(--accent);border-color:var(--accent);}
+  .speak-label{font-family:sans-serif;font-size:.72rem;opacity:.55;margin:10px 0 2px;}
+  .passage-title{position:relative;}
+  .passage-speak{
+    font-family:sans-serif;
+    font-size:.75rem;
+    background:transparent;
+    color:var(--accent2);
+    border:1px solid var(--accent2);
+    border-radius:14px;
+    padding:3px 10px;
+    cursor:pointer;
+    margin-left:8px;
+  }
+  .qspeak{
+    font-family:sans-serif;
+    font-size:.72rem;
+    background:transparent;
+    color:var(--accent);
+    border:1px solid var(--accent);
+    border-radius:12px;
+    padding:1px 8px;
+    cursor:pointer;
+    margin-left:6px;
+    vertical-align:middle;
+  }
+  .voice-note{
+    font-family:sans-serif;
+    font-size:.72rem;
+    color:var(--muted);
+    text-align:center;
+    margin-top:-6px;
+    margin-bottom:10px;
+  }
   .pattern-card{
     background:var(--paper2);
     border:1px solid var(--line);
@@ -265,7 +311,7 @@
 
 <header>
   <h1>TOEIC 閱讀測驗練習站</h1>
-  <p>點擊文章中橘色底線的單字可查看中文解釋與例句・按鈕可顯示整段中文翻譯</p>
+  <p>點擊文章中橘色底線的單字可查看中文解釋與例句・按鈕可顯示整段中文翻譯・🐢🐇 可聽慢速清晰／正常連音發音</p>
   <nav class="tabs test-select" id="testTabs">
     <button data-test="test1" class="active">Test 1（101–200）</button>
     <button data-test="test2">Test 2（101–200）</button>
@@ -278,6 +324,7 @@
   </nav>
 </header>
 
+<div class="voice-note" id="voiceNote"></div>
 <main id="main"></main>
 
 <footer>Test 1 · Test 2 各 101–200 題（取自使用者提供之閱讀測驗文字檔／圖檔）</footer>
@@ -458,6 +505,42 @@ const VOCAB = {
   "resistance":{pos:"n.", zh:"耐受度；抵抗力", ex:"Durability tests check weight, resistance, and material quality.", exZh:"耐用度測試會檢查重量、耐受度與材質品質。"},
   "structurally":{pos:"adv.", zh:"結構上地", ex:"The bridge is overall structurally sound.", exZh:"這座橋整體結構良好。"}
 };
+
+/* ============ TEXT-TO-SPEECH ============ */
+let ttsVoice = null;
+function pickVoice(){
+  const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  if(!voices.length) return;
+  ttsVoice = voices.find(v=>v.lang==='en-US' && /Google|Samantha|Microsoft/i.test(v.name))
+          || voices.find(v=>v.lang==='en-US')
+          || voices.find(v=>v.lang && v.lang.startsWith('en'))
+          || voices[0];
+  const note = document.getElementById('voiceNote');
+  if(note) note.textContent = ttsVoice ? ('目前使用語音：'+ttsVoice.name+'（'+ttsVoice.lang+'）・語音品質依瀏覽器而異，建議使用電腦版 Chrome') : '此瀏覽器不支援語音朗讀';
+}
+if(window.speechSynthesis){
+  pickVoice();
+  window.speechSynthesis.onvoiceschanged = pickVoice;
+}
+let SPEAK_STORE = [];
+function registerSpeak(text){ SPEAK_STORE.push(text); return SPEAK_STORE.length-1; }
+function speakStored(idx, mode, btn){ speakText(SPEAK_STORE[idx], mode, btn); }
+function speakText(text, mode, btn){
+  if(!window.speechSynthesis){ alert('此瀏覽器不支援語音朗讀功能，建議改用電腦版 Chrome。'); return; }
+  window.speechSynthesis.cancel();
+  document.querySelectorAll('.speak-btn.playing,.qspeak.playing,.passage-speak.playing').forEach(b=>b.classList.remove('playing'));
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US';
+  if(ttsVoice) u.voice = ttsVoice;
+  if(mode==='slow'){ u.rate = 0.55; u.pitch = 1.0; }
+  else { u.rate = 1.0; u.pitch = 1.0; }
+  if(btn){
+    btn.classList.add('playing');
+    u.onend = ()=>btn.classList.remove('playing');
+    u.onerror = ()=>btn.classList.remove('playing');
+  }
+  window.speechSynthesis.speak(u);
+}
 
 /* ============ SENTENCE PATTERNS ============ */
 const PATTERNS = [
@@ -915,12 +998,23 @@ function highlight(text){
 function openVocab(key){
   const v = VOCAB[key];
   if(!v) return;
+  const wordText = key.replace(/-/g,' ');
   document.getElementById('vocabContent').innerHTML = `
-    <h3>${key.replace(/-/g,' ')}</h3>
+    <h3>${wordText}</h3>
     <div class="pos">${v.pos}</div>
+    <div class="speak-label">單字發音</div>
+    <div class="speak-row">
+      <button class="speak-btn" onclick="speakText('${wordText.replace(/'/g,"\\'")}','slow',this)">🐢 慢速清晰</button>
+      <button class="speak-btn" onclick="speakText('${wordText.replace(/'/g,"\\'")}','normal',this)">🐇 正常連音</button>
+    </div>
     <div class="zh">${v.zh}</div>
     <div class="ex-en">"${v.ex}"</div>
-    <div class="ex-zh">${v.exZh}</div>`;
+    <div class="ex-zh">${v.exZh}</div>
+    <div class="speak-label">例句發音</div>
+    <div class="speak-row">
+      <button class="speak-btn" onclick="speakText('${v.ex.replace(/'/g,"\\'")}','slow',this)">🐢 慢速清晰</button>
+      <button class="speak-btn" onclick="speakText('${v.ex.replace(/'/g,"\\'")}','normal',this)">🐇 正常連音</button>
+    </div>`;
   document.getElementById('vocabPanel').classList.add('open');
   document.getElementById('vocabOverlay').classList.add('open');
 }
@@ -967,8 +1061,11 @@ function renderP5(){
   <div class="directions">每題句子中缺少一個單字或片語，請從四個選項中選出最適合的答案。點擊選項後會立即顯示正確答案與簡要解析。</div>`;
   data.forEach(q=>{
     const gid = currentTest+'p5g'+q.n;
+    const speakIdx = registerSpeak(q.s.replace('___', q.c[q.a]));
     h += `<div class="card">
-      <div class="sentence"><span class="qnum">${q.n}.</span>${highlight(q.s.replace('___','_____'))}</div>
+      <div class="sentence"><span class="qnum">${q.n}.</span>${highlight(q.s.replace('___','_____'))}
+        <button class="qspeak" onclick="speakStored(${speakIdx},'slow',this)">🐢</button><button class="qspeak" onclick="speakStored(${speakIdx},'normal',this)">🐇</button>
+      </div>
       <div class="choices" id="${gid}">
         ${q.c.map((c,i)=>`<button class="choice-btn" onclick="choose('p5',${q.n},${i},${q.a},'${gid}')">(${String.fromCharCode(65+i)}) ${c}</button>`).join('')}
       </div>
@@ -987,8 +1084,12 @@ function renderP6(){
     const blankSpans = {};
     t.blanks.forEach(b=>{ blankSpans[b.n]=`<span class="blank-tag">${b.n}</span>`; });
     text = text.replace(/\{\{(\d+)\}\}/g, (m,n)=>blankSpans[n]);
+    const speakText6 = t.text.replace(/\{\{\d+\}\}/g, (m,n)=>t.blanks.find(b=>('{{'+b.n+'}}')===m) ? t.blanks.find(b=>('{{'+b.n+'}}')===m).c[t.blanks.find(b=>('{{'+b.n+'}}')===m).a] : 'blank');
+    const speakIdx6 = registerSpeak(speakText6);
     h += `<div class="passage-box">
-      <div class="passage-title">Questions ${t.range} · ${t.title}</div>
+      <div class="passage-title">Questions ${t.range} · ${t.title}
+        <button class="passage-speak" onclick="speakStored(${speakIdx6},'slow',this)">🐢 慢速</button><button class="passage-speak" onclick="speakStored(${speakIdx6},'normal',this)">🐇 連音</button>
+      </div>
       <div class="passage-text">${highlight(text)}</div>
     </div>
     <div class="toolbar">
@@ -1014,8 +1115,11 @@ function renderP7(){
   let h = `<div class="section-title">Part 7 － 閱讀理解<span class="score" id="score-p7">尚未作答</span></div>
   <div class="directions">閱讀下列文章並回答問題。可點選文章中橘色底線的單字查看解釋，或按下方按鈕顯示整段中文翻譯。</div>`;
   data.forEach(t=>{
+    const speakIdx7 = registerSpeak(t.text);
     h += `<div class="passage-box">
-      <div class="passage-title">Questions ${t.qrange} · ${t.title}</div>
+      <div class="passage-title">Questions ${t.qrange} · ${t.title}
+        <button class="passage-speak" onclick="speakStored(${speakIdx7},'slow',this)">🐢 慢速</button><button class="passage-speak" onclick="speakStored(${speakIdx7},'normal',this)">🐇 連音</button>
+      </div>
       <div class="passage-text">${highlight(t.text)}</div>
     </div>
     <div class="toolbar">
@@ -1040,10 +1144,13 @@ function renderPatterns(){
   let h = `<div class="section-title">常用句型參考</div>
   <div class="directions">以下句型取材自 Test 1 / Test 2 文章中反覆出現、值得學起來的實用句型與搭配用法。</div>`;
   PATTERNS.forEach(p=>{
+    const idx = registerSpeak(p.ex);
     h += `<div class="pattern-card">
       <div class="pattern-en">${p.en}</div>
       <div class="pattern-zh">${p.zh}</div>
-      <div class="pattern-ex">${highlight(p.ex)}</div>
+      <div class="pattern-ex">${highlight(p.ex)}
+        <button class="qspeak" onclick="speakStored(${idx},'slow',this)">🐢</button><button class="qspeak" onclick="speakStored(${idx},'normal',this)">🐇</button>
+      </div>
       <div class="pattern-exzh">${p.exZh}</div>
     </div>`;
   });
