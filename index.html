@@ -305,6 +305,62 @@
   .pattern-zh{font-family:sans-serif;font-size:.85rem;color:var(--muted);margin:2px 0 8px;}
   .pattern-ex{font-size:.95rem;}
   .pattern-exzh{font-family:sans-serif;font-size:.85rem;color:var(--muted);margin-top:2px;}
+
+  /* inline fill-in-the-blank choices */
+  .qnum-mini{
+    font-size:.68rem;
+    color:var(--muted);
+    font-family:sans-serif;
+    vertical-align:super;
+    margin-right:1px;
+  }
+  .inline-choices{white-space:nowrap;}
+  .inline-choice{
+    font-family:sans-serif;
+    display:inline-block;
+    margin:1px 2px;
+    padding:2px 9px;
+    border:1px solid var(--line);
+    border-radius:12px;
+    background:var(--paper);
+    cursor:pointer;
+    font-size:.9rem;
+    color:var(--ink);
+  }
+  .inline-choice:hover{border-color:var(--accent);}
+  .inline-choice.correct{background:#e4f3e8;border-color:var(--good);color:var(--good);font-weight:700;}
+  .inline-choice.wrong{background:#fbe7e3;border-color:var(--bad);color:var(--bad);text-decoration:line-through;}
+  .inline-choice.disabled{cursor:default;}
+  .inline-explain{
+    display:none;
+    font-family:sans-serif;
+    font-size:.78rem;
+    color:var(--accent2);
+    background:#eef3ef;
+    padding:1px 8px;
+    border-radius:10px;
+    margin-left:4px;
+    white-space:normal;
+  }
+  #quickTipBox{
+    position:absolute;
+    display:none;
+    z-index:200;
+    background:var(--ink);
+    color:var(--paper);
+    padding:7px 12px;
+    border-radius:8px;
+    font-family:sans-serif;
+    font-size:.82rem;
+    max-width:220px;
+    box-shadow:0 4px 16px rgba(0,0,0,.3);
+    pointer-events:none;
+    line-height:1.5;
+  }
+  #quickTipBox b{color:#f4d9c6;}
+  #quickTipBox .qt-pos{opacity:.6;font-size:.72rem;}
+  .speak-btn.playing.paused::after,.qspeak.playing.paused::after,.passage-speak.playing.paused::after{content:' ⏸';}
+  .speak-btn.playing:not(.paused)::after,.qspeak.playing:not(.paused)::after,.passage-speak.playing:not(.paused)::after{content:' ▶';}
 </style>
 </head>
 <body>
@@ -329,6 +385,7 @@
 
 <footer>Test 1 · Test 2 各 101–200 題（取自使用者提供之閱讀測驗文字檔／圖檔）</footer>
 
+<div id="quickTipBox"></div>
 <div id="vocabOverlay"></div>
 <div id="vocabPanel">
   <button class="close" onclick="closeVocab()">✕</button>
@@ -503,7 +560,145 @@ const VOCAB = {
   "trial run":{pos:"n.片語", zh:"試產；試營運", ex:"The production trial-run schedule shows several key steps.", exZh:"生產試產排程列出了幾個關鍵步驟。"},
   "assembly":{pos:"n.", zh:"組裝", ex:"Production and assembly of parts took place on Tuesday.", exZh:"零件的生產與組裝於週二進行。"},
   "resistance":{pos:"n.", zh:"耐受度；抵抗力", ex:"Durability tests check weight, resistance, and material quality.", exZh:"耐用度測試會檢查重量、耐受度與材質品質。"},
-  "structurally":{pos:"adv.", zh:"結構上地", ex:"The bridge is overall structurally sound.", exZh:"這座橋整體結構良好。"}
+  "structurally":{pos:"adv.", zh:"結構上地", ex:"The bridge is overall structurally sound.", exZh:"這座橋整體結構良好。"},
+
+  "address":{pos:"v.", zh:"處理；解決", ex:"The manager will address the issue at the next meeting.", exZh:"經理將在下次會議中處理這個問題。"},
+  "allowance":{pos:"n.", zh:"津貼；額度", ex:"Employees receive a monthly allowance for transportation.", exZh:"員工每月可領取交通津貼。"},
+  "apply":{pos:"v.", zh:"申請；應用", ex:"She applied for the position last week.", exZh:"她上週申請了這個職位。"},
+  "assess":{pos:"v.", zh:"評估", ex:"Managers assess employee performance every year.", exZh:"主管每年都會評估員工表現。"},
+  "authority":{pos:"n.", zh:"當局；主管機關", ex:"The authorities approved the new building plan.", exZh:"主管機關核准了這項新建案。"},
+  "calculate":{pos:"v.", zh:"計算", ex:"The software will calculate the total automatically.", exZh:"這套軟體會自動計算總額。"},
+  "calculation":{pos:"n.", zh:"計算", ex:"Her calculations were accurate.", exZh:"她的計算結果準確無誤。"},
+  "casual":{pos:"adj.", zh:"隨性的；非正式的", ex:"The office has a casual dress code on Fridays.", exZh:"這間辦公室週五採取輕便服裝。"},
+  "central":{pos:"adj.", zh:"中心的；核心的", ex:"The store has a central location downtown.", exZh:"這家店位在市中心的核心地段。"},
+  "centrally":{pos:"adv.", zh:"位於中心地", ex:"The office is centrally located near the subway.", exZh:"這間辦公室地理位置便利，鄰近捷運站。"},
+  "collaborate":{pos:"v.", zh:"合作", ex:"The two teams collaborated on the project.", exZh:"這兩個團隊在這項專案上合作。"},
+  "collaboration":{pos:"n.", zh:"合作", ex:"Close collaboration led to the project's success.", exZh:"密切的合作促成了這項專案的成功。"},
+  "conclude":{pos:"v.", zh:"結束；下結論", ex:"The meeting concluded with a summary of action items.", exZh:"會議以行動項目總結作結。"},
+  "consist":{pos:"v.", zh:"由…組成", ex:"The committee consists of five members.", exZh:"委員會由五位成員組成。"},
+  "critical":{pos:"adj.", zh:"批判的；至關重要的", ex:"She received critical feedback on her proposal.", exZh:"她的提案收到了不少批評意見。"},
+  "criticism":{pos:"n.", zh:"批評", ex:"The plan faced heavy criticism at first.", exZh:"這項計畫起初遭受不少批評。"},
+  "criticize":{pos:"v.", zh:"批評", ex:"Reviewers criticized the film's slow pace.", exZh:"影評人批評這部電影節奏太慢。"},
+  "decide":{pos:"v.", zh:"決定", ex:"They decided to postpone the launch.", exZh:"他們決定延後發表。"},
+  "defend":{pos:"v.", zh:"辯護；防守", ex:"The lawyer will defend her client in court.", exZh:"律師將在法庭上為當事人辯護。"},
+  "delay":{pos:"v./n.", zh:"延遲", ex:"The flight was delayed due to weather.", exZh:"班機因天氣因素延誤。"},
+  "dependence":{pos:"n.", zh:"依賴", ex:"The company reduced its dependence on a single supplier.", exZh:"該公司降低了對單一供應商的依賴。"},
+  "destination":{pos:"n.", zh:"目的地", ex:"Paris is a popular travel destination.", exZh:"巴黎是熱門的旅遊目的地。"},
+  "detect":{pos:"v.", zh:"偵測", ex:"The sensor can detect small changes in temperature.", exZh:"這個感測器能偵測到細微的溫度變化。"},
+  "develop":{pos:"v.", zh:"開發；發展", ex:"The team developed a new app.", exZh:"這個團隊開發了一款新應用程式。"},
+  "developer":{pos:"n.", zh:"開發者", ex:"The developers tested the software carefully.", exZh:"開發人員仔細測試了這套軟體。"},
+  "development":{pos:"n.", zh:"發展", ex:"Economic development has been steady this year.", exZh:"今年經濟發展穩定。"},
+  "discuss":{pos:"v.", zh:"討論", ex:"Let's discuss this over lunch.", exZh:"我們午餐時再討論這件事吧。"},
+  "enthusiastic":{pos:"adj.", zh:"熱情的", ex:"The new hire is enthusiastic about the role.", exZh:"這位新進員工對這個職位充滿熱忱。"},
+  "estimation":{pos:"n.", zh:"估計", ex:"His estimation of the cost was close.", exZh:"他對成本的估計相當接近。"},
+  "excel":{pos:"v.", zh:"表現優異", ex:"She excels at public speaking.", exZh:"她很擅長公開演講。"},
+  "excellent":{pos:"adj.", zh:"優秀的", ex:"The restaurant received excellent reviews.", exZh:"這家餐廳獲得許多好評。"},
+  "exclusive":{pos:"adj.", zh:"獨家的；專屬的", ex:"Members get access to exclusive discounts.", exZh:"會員可享有專屬折扣。"},
+  "fare":{pos:"n.", zh:"票價", ex:"The bus fare increased this month.", exZh:"這個月公車票價調漲了。"},
+  "favor":{pos:"n./v.", zh:"恩惠；偏好", ex:"Could you do me a favor?", exZh:"你能幫我個忙嗎？"},
+  "follow":{pos:"v.", zh:"遵循；跟隨", ex:"Please follow the instructions carefully.", exZh:"請仔細遵循說明。"},
+  "hiring":{pos:"n.", zh:"招募", ex:"The hiring process takes about a month.", exZh:"招募流程大約需要一個月。"},
+  "implement":{pos:"v.", zh:"實施", ex:"The company will implement the new policy next week.", exZh:"公司下週將實施這項新政策。"},
+  "impress":{pos:"v.", zh:"使印象深刻", ex:"The presentation impressed the clients.", exZh:"這場簡報讓客戶印象深刻。"},
+  "impressive":{pos:"adj.", zh:"令人印象深刻的", ex:"Her portfolio is impressive.", exZh:"她的作品集令人印象深刻。"},
+  "include":{pos:"v.", zh:"包含", ex:"The price includes tax.", exZh:"這個價格已含稅。"},
+  "indicate":{pos:"v.", zh:"顯示；指出", ex:"The report indicates strong growth.", exZh:"這份報告顯示出強勁的成長。"},
+  "instrument":{pos:"n.", zh:"工具；樂器", ex:"A thermometer is a useful instrument.", exZh:"溫度計是很實用的工具。"},
+  "interview":{pos:"n.", zh:"面試", ex:"She has an interview tomorrow.", exZh:"她明天有一場面試。"},
+  "introduce":{pos:"v.", zh:"介紹", ex:"Let me introduce you to the team.", exZh:"讓我為你介紹團隊成員。"},
+  "introductory":{pos:"adj.", zh:"入門的；介紹性的", ex:"This is an introductory course for beginners.", exZh:"這是給初學者的入門課程。"},
+  "invention":{pos:"n.", zh:"發明", ex:"The invention changed the industry.", exZh:"這項發明改變了整個產業。"},
+  "involve":{pos:"v.", zh:"涉及", ex:"The project involves several departments.", exZh:"這項專案涉及好幾個部門。"},
+  "namely":{pos:"adv.", zh:"也就是", ex:"Two people were late, namely John and Sara.", exZh:"有兩個人遲到，也就是約翰和莎拉。"},
+  "otherwise":{pos:"adv.", zh:"否則", ex:"Submit the form today; otherwise, it won't be processed.", exZh:"請今天送出表單，否則將不予受理。"},
+  "patiently":{pos:"adv.", zh:"耐心地", ex:"She waited patiently for her turn.", exZh:"她耐心地等待輪到自己。"},
+  "political":{pos:"adj.", zh:"政治的", ex:"The decision was seen as political.", exZh:"這項決定被視為帶有政治性質。"},
+  "practical":{pos:"adj.", zh:"實用的", ex:"The workshop offers practical advice.", exZh:"這場工作坊提供實用的建議。"},
+  "precise":{pos:"adj.", zh:"精確的", ex:"We need precise measurements.", exZh:"我們需要精確的測量數據。"},
+  "precisely":{pos:"adv.", zh:"精確地", ex:"The train arrived precisely on time.", exZh:"火車準時抵達。"},
+  "precision":{pos:"n.", zh:"精確度", ex:"The device works with great precision.", exZh:"這個裝置運作非常精確。"},
+  "predict":{pos:"v.", zh:"預測", ex:"Experts predict a strong market next year.", exZh:"專家預測明年市場表現強勁。"},
+  "predictable":{pos:"adj.", zh:"可預測的", ex:"The outcome was predictable.", exZh:"這個結果是可以預料到的。"},
+  "producer":{pos:"n.", zh:"生產者；製作人", ex:"The film's producer attended the premiere.", exZh:"這部電影的製片人出席了首映會。"},
+  "product":{pos:"n.", zh:"產品", ex:"The new product launches next month.", exZh:"新產品下個月上市。"},
+  "production":{pos:"n.", zh:"生產", ex:"Production has increased this quarter.", exZh:"本季產量增加了。"},
+  "productive":{pos:"adj.", zh:"有生產力的", ex:"The meeting was very productive.", exZh:"這場會議非常有效率。"},
+  "promotion":{pos:"n.", zh:"升遷；促銷", ex:"She received a promotion last year.", exZh:"她去年獲得升遷。"},
+  "property":{pos:"n.", zh:"財產；地產", ex:"They own several properties downtown.", exZh:"他們在市中心擁有多處房產。"},
+  "provision":{pos:"n.", zh:"條款；供應", ex:"The contract includes a cancellation provision.", exZh:"合約中包含一項取消條款。"},
+  "quick":{pos:"adj.", zh:"快速的", ex:"That was a quick response.", exZh:"這個回覆速度很快。"},
+  "quickly":{pos:"adv.", zh:"快速地", ex:"She quickly finished the report.", exZh:"她很快就完成了報告。"},
+  "receipt":{pos:"n.", zh:"收據", ex:"Please keep your receipt for a refund.", exZh:"請保留收據以便退款。"},
+  "recognize":{pos:"v.", zh:"認出；表揚", ex:"The company recognized her hard work.", exZh:"公司表揚了她的努力工作。"},
+  "regarding":{pos:"prep.", zh:"關於", ex:"Regarding your question, I'll check and get back to you.", exZh:"關於你的問題，我會確認後回覆你。"},
+  "regular":{pos:"adj.", zh:"定期的；規律的", ex:"He goes for a regular check-up.", exZh:"他會定期做健康檢查。"},
+  "regularity":{pos:"n.", zh:"規律性", ex:"The trains run with great regularity.", exZh:"這些火車班次非常規律。"},
+  "remind":{pos:"v.", zh:"提醒", ex:"Please remind me about the meeting.", exZh:"請提醒我開會的事。"},
+  "request":{pos:"n./v.", zh:"請求", ex:"She made a request for more time.", exZh:"她請求多給一些時間。"},
+  "require":{pos:"v.", zh:"需要；要求", ex:"The job requires strong communication skills.", exZh:"這份工作需要良好的溝通能力。"},
+  "resource":{pos:"n.", zh:"資源", ex:"The library is a great resource for students.", exZh:"圖書館對學生來說是很棒的資源。"},
+  "revision":{pos:"n.", zh:"修訂", ex:"The document went through several revisions.", exZh:"這份文件經過好幾次修訂。"},
+  "section":{pos:"n.", zh:"部分；區域", ex:"Please read the first section carefully.", exZh:"請仔細閱讀第一部分。"},
+  "serve":{pos:"v.", zh:"服務；擔任", ex:"He served as manager for five years.", exZh:"他擔任經理長達五年。"},
+  "solely":{pos:"adv.", zh:"僅僅；單獨地", ex:"The decision was made solely by the director.", exZh:"這項決定完全由總監一人決定。"},
+  "specific":{pos:"adj.", zh:"具體的；特定的", ex:"Please give me a specific example.", exZh:"請給我一個具體的例子。"},
+  "substance":{pos:"n.", zh:"物質；實質內容", ex:"The report lacks substance.", exZh:"這份報告內容空洞、缺乏實質內容。"},
+  "substantiate":{pos:"v.", zh:"證實", ex:"She could not substantiate her claim.", exZh:"她無法證實自己的說法。"},
+  "successful":{pos:"adj.", zh:"成功的", ex:"The campaign was very successful.", exZh:"這次活動非常成功。"},
+  "supply":{pos:"n./v.", zh:"供應", ex:"The factory supplies parts to several companies.", exZh:"這間工廠為多家公司供應零件。"},
+  "systematic":{pos:"adj.", zh:"有系統的", ex:"They took a systematic approach to the problem.", exZh:"他們以有系統的方式處理這個問題。"},
+  "thought":{pos:"n.", zh:"想法", ex:"She shared her thoughts on the plan.", exZh:"她分享了對這項計畫的想法。"},
+  "thoughtful":{pos:"adj.", zh:"體貼的；深思熟慮的", ex:"That was a thoughtful gift.", exZh:"這是一份很貼心的禮物。"},
+  "totally":{pos:"adv.", zh:"完全地", ex:"I totally agree with you.", exZh:"我完全同意你的看法。"},
+  "treat":{pos:"v.", zh:"對待；治療", ex:"The clinic treats a variety of injuries.", exZh:"這間診所治療各種傷害。"},
+  "familiar":{pos:"adj.", zh:"熟悉的", ex:"The process is familiar to most employees.", exZh:"大多數員工都很熟悉這個流程。"},
+  "join":{pos:"v.", zh:"加入", ex:"She joined the company last year.", exZh:"她去年加入這間公司。"},
+  "menu":{pos:"n.", zh:"菜單", ex:"The restaurant updated its menu this season.", exZh:"這間餐廳這一季更新了菜單。"},
+  "clothing":{pos:"n.", zh:"服裝", ex:"The store sells outdoor clothing.", exZh:"這家店販售戶外服裝。"},
+  "event":{pos:"n.", zh:"活動；事件", ex:"The company is planning a charity event.", exZh:"公司正在籌辦一場慈善活動。"},
+  "investment":{pos:"n.", zh:"投資", ex:"The company made a major investment in new equipment.", exZh:"該公司在新設備上投入了大筆資金。"},
+  "interest":{pos:"n.", zh:"興趣；利息", ex:"She has a strong interest in international markets.", exZh:"她對國際市場深感興趣。"},
+  "attendee":{pos:"n.", zh:"出席者；與會者", ex:"Each attendee received a name badge.", exZh:"每位出席者都拿到了一個名牌。"},
+  "warehouse":{pos:"n.", zh:"倉庫", ex:"The goods are stored in a large warehouse.", exZh:"這些貨物存放在一座大型倉庫裡。"},
+  "turnout":{pos:"n.", zh:"出席人數", ex:"The event had a low turnout due to rain.", exZh:"由於下雨，這場活動的出席人數不多。"},
+  "banquet":{pos:"n.", zh:"宴會", ex:"The awards banquet will be held in the ballroom.", exZh:"頒獎宴會將在宴會廳舉行。"},
+  "audit":{pos:"n./v.", zh:"稽核", ex:"The company undergoes an annual audit.", exZh:"這間公司每年都會接受稽核。"},
+  "intern":{pos:"n.", zh:"實習生", ex:"He worked as an intern last summer.", exZh:"他去年夏天擔任實習生。"},
+  "curriculum":{pos:"n.", zh:"課程；課程大綱", ex:"The school updated its curriculum this year.", exZh:"這所學校今年更新了課程內容。"},
+  "session":{pos:"n.", zh:"場次；一節課", ex:"The training includes several online sessions.", exZh:"這項培訓包含好幾場線上課程。"},
+  "assignment":{pos:"n.", zh:"任務；作業", ex:"She completed the assignment ahead of schedule.", exZh:"她提前完成了這項任務。"},
+  "supervisor":{pos:"n.", zh:"主管", ex:"Please ask your supervisor for approval.", exZh:"請向您的主管申請核准。"},
+  "approval":{pos:"n.", zh:"核准", ex:"The project needs management approval.", exZh:"這項專案需要管理層核准。"},
+  "confirm":{pos:"v.", zh:"確認", ex:"Please confirm your attendance by Friday.", exZh:"請於週五前確認您是否出席。"},
+  "presentation":{pos:"n.", zh:"簡報", ex:"She gave a presentation on the new product.", exZh:"她針對新產品做了一場簡報。"},
+  "complimentary":{pos:"adj.", zh:"免費贈送的", ex:"Guests receive a complimentary breakfast.", exZh:"房客可享用免費早餐。"},
+  "guarantee":{pos:"v./n.", zh:"保證", ex:"The store guarantees a full refund.", exZh:"這家店保證全額退款。"},
+  "valued":{pos:"adj.", zh:"受重視的；珍貴的", ex:"Thank you for being a valued customer.", exZh:"感謝您成為我們珍視的顧客。"},
+  "correction":{pos:"n.", zh:"更正", ex:"Please make the necessary correction to the address.", exZh:"請對地址進行必要的更正。"},
+  "orientation":{pos:"n.", zh:"新人訓練；培訓說明會", ex:"New employees attend an orientation session.", exZh:"新進員工須參加新人訓練說明會。"},
+  "candidate":{pos:"n.", zh:"候選人", ex:"Three candidates were shortlisted for the job.", exZh:"三位候選人進入這份工作的最終名單。"},
+  "applicant":{pos:"n.", zh:"應徵者", ex:"Only qualified applicants will be interviewed.", exZh:"只有合格的應徵者才會被安排面試。"},
+  "invoice":{pos:"n.", zh:"發票；請款單", ex:"Attached please find a copy of the invoice.", exZh:"隨信附上發票副本。"},
+  "shipment":{pos:"n.", zh:"貨運；出貨", ex:"The shipment is expected to arrive next week.", exZh:"這批貨物預計下週送達。"},
+  "combine":{pos:"v.", zh:"結合；合併", ex:"Items from multiple orders may be combined in the same package.", exZh:"多筆訂單的商品可能會合併包裝出貨。"},
+  "publisher":{pos:"n.", zh:"出版社", ex:"The publisher released the book in October.", exZh:"這家出版社於十月發行了這本書。"},
+  "author":{pos:"n.", zh:"作者", ex:"The author signed copies of her book.", exZh:"這位作者為她的書簽名。"},
+  "landlord":{pos:"n.", zh:"房東", ex:"The landlord offered a discount on rent.", exZh:"房東提供了租金折扣。"},
+  "outlet":{pos:"n.", zh:"分店；暢貨中心", ex:"The company closed an outlet in the city.", exZh:"該公司關閉了市內一家分店。"},
+  "renew":{pos:"v.", zh:"續約；更新", ex:"The lease was not renewed this year.", exZh:"這份租約今年並未續簽。"},
+  "closure":{pos:"n.", zh:"關閉", ex:"The bridge requires immediate closure.", exZh:"這座橋需要立即封閉。"},
+  "quarter":{pos:"n.", zh:"（一年的）季", ex:"Sales grew in the third quarter.", exZh:"第三季的銷售額成長了。"},
+  "financial":{pos:"adj.", zh:"財務的；金融的", ex:"She works in the financial services industry.", exZh:"她在金融服務業工作。"},
+  "operations":{pos:"n.", zh:"營運", ex:"The suggestions improved daily operations.", exZh:"這些建議改善了日常營運。"},
+  "procedure":{pos:"n.", zh:"程序", ex:"Please follow the standard procedure.", exZh:"請遵循標準程序。"},
+  "routine":{pos:"adj./n.", zh:"例行的；慣例", ex:"He quickly mastered our regular procedures.", exZh:"他很快就掌握了我們的例行程序。"},
+  "efficient":{pos:"adj.", zh:"有效率的", ex:"The new process is more efficient.", exZh:"這項新流程更有效率。"},
+  "efficiency":{pos:"n.", zh:"效率", ex:"The factory was evaluated for safety and efficiency.", exZh:"這間工廠接受了安全與效率的評估。"},
+  "workflow":{pos:"n.", zh:"工作流程", ex:"He made suggestions for making our workflow more efficient.", exZh:"他提出了讓工作流程更有效率的建議。"},
+  "incorporate":{pos:"v.", zh:"納入；併入", ex:"These changes have been incorporated into daily operations.", exZh:"這些改變已被納入日常作業之中。"},
+  "asset":{pos:"n.", zh:"資產；有價值的人／物", ex:"He will be a great asset to your organization.", exZh:"他將成為貴機構的一大資產。"},
+  "recommend":{pos:"v.", zh:"推薦", ex:"I strongly recommend her for the position.", exZh:"我強烈推薦她擔任這個職位。"},
+  "recommendation":{pos:"n.", zh:"推薦（信）", ex:"He wrote a letter of recommendation for his intern.", exZh:"他為他的實習生寫了一封推薦信。"}
 };
 
 /* ============ TEXT-TO-SPEECH ============ */
@@ -525,19 +720,43 @@ if(window.speechSynthesis){
 let SPEAK_STORE = [];
 function registerSpeak(text){ SPEAK_STORE.push(text); return SPEAK_STORE.length-1; }
 function speakStored(idx, mode, btn){ speakText(SPEAK_STORE[idx], mode, btn); }
+
+let ttsState = { btn:null, paused:false };
+function resetAllSpeakButtons(){
+  document.querySelectorAll('.speak-btn.playing,.qspeak.playing,.passage-speak.playing').forEach(b=>{
+    b.classList.remove('playing'); b.classList.remove('paused');
+  });
+}
 function speakText(text, mode, btn){
   if(!window.speechSynthesis){ alert('此瀏覽器不支援語音朗讀功能，建議改用電腦版 Chrome。'); return; }
+  // clicking the currently active button again -> toggle pause/resume
+  if(btn && ttsState.btn===btn && window.speechSynthesis.speaking){
+    if(ttsState.paused){
+      window.speechSynthesis.resume();
+      ttsState.paused = false;
+      btn.classList.remove('paused');
+    } else {
+      window.speechSynthesis.pause();
+      ttsState.paused = true;
+      btn.classList.add('paused');
+    }
+    return;
+  }
+  // otherwise: stop whatever is playing and start fresh
   window.speechSynthesis.cancel();
-  document.querySelectorAll('.speak-btn.playing,.qspeak.playing,.passage-speak.playing').forEach(b=>b.classList.remove('playing'));
+  resetAllSpeakButtons();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = 'en-US';
   if(ttsVoice) u.voice = ttsVoice;
-  if(mode==='slow'){ u.rate = 0.55; u.pitch = 1.0; }
-  else { u.rate = 1.0; u.pitch = 1.0; }
+  u.rate = (mode==='slow') ? 0.55 : 1.0;
+  u.pitch = 1.0;
   if(btn){
     btn.classList.add('playing');
-    u.onend = ()=>btn.classList.remove('playing');
-    u.onerror = ()=>btn.classList.remove('playing');
+    btn.classList.remove('paused');
+    ttsState = { btn:btn, paused:false };
+    const clear = ()=>{ btn.classList.remove('playing'); btn.classList.remove('paused'); if(ttsState.btn===btn) ttsState={btn:null,paused:false}; };
+    u.onend = clear;
+    u.onerror = clear;
   }
   window.speechSynthesis.speak(u);
 }
@@ -561,7 +780,16 @@ const PATTERNS = [
  {en:"be intrigued when...", zh:"對…感到興趣", ex:"She was intrigued when a director approached her about mentoring.", exZh:"當主管找她談擔任導師一事時，她感到很有興趣。"},
  {en:"provided that / unless", zh:"除非、只要", ex:"The coupon cannot be combined with any other offers.", exZh:"此優惠券不得與其他優惠合併使用。"},
  {en:"be pleased to V", zh:"很高興…", ex:"I am pleased to be writing this letter of recommendation.", exZh:"我很高興撰寫這封推薦信。"},
- {en:"be confident that...", zh:"確信…", ex:"I am confident my years of accounting experience would benefit your firm.", exZh:"我相信我多年的會計經驗將對貴公司有所助益。"}
+ {en:"be confident that...", zh:"確信…", ex:"I am confident my years of accounting experience would benefit your firm.", exZh:"我相信我多年的會計經驗將對貴公司有所助益。"},
+ {en:"require + O + to V", zh:"要求…做…", ex:"The job requires applicants to have prior experience.", exZh:"這份工作要求應徵者具備先前的經驗。"},
+ {en:"be committed to Ving", zh:"致力於…", ex:"The company is committed to reducing waste.", exZh:"該公司致力於減少浪費。"},
+ {en:"in response to N", zh:"為回應…", ex:"In response to customer feedback, we updated the app.", exZh:"為回應顧客意見，我們更新了這款應用程式。"},
+ {en:"as of + 時間", zh:"截至（某時間點）", ex:"As of today, we can officially announce the new CEO.", exZh:"截至今日，我們可以正式宣布新任執行長人選。"},
+ {en:"please be aware that...", zh:"請留意…", ex:"Please be aware that local regulations may apply.", exZh:"請留意當地法規可能適用。"},
+ {en:"on behalf of N", zh:"代表…", ex:"I am writing on behalf of the committee.", exZh:"我謹代表委員會撰寫此信。"},
+ {en:"be subject to N", zh:"須遵照…、視…而定", ex:"Prices are subject to change without notice.", exZh:"價格如有變動，恕不另行通知。"},
+ {en:"given that...", zh:"鑑於…、既然…", ex:"Given that the deadline is near, we should hurry.", exZh:"既然截止日期將近，我們應該加快腳步。"},
+ {en:"at no extra charge", zh:"不額外收費", ex:"Delivery is included at no extra charge.", exZh:"運送費用已包含在內，不額外收費。"}
 ];
 
 /* ============ TEST 1 DATA ============ */
@@ -990,14 +1218,36 @@ function highlight(text){
   words.forEach(w=>{
     const disp = w.replace(/[-\s]/g,m=>"\\"+m);
     const re = new RegExp("\\b("+disp+")\\b","gi");
-    html = html.replace(re, (m)=>`<span class="vocab" onclick="openVocab('${w.replace(/'/g,"\\'")}')">${m}</span>`);
+    const wEsc = w.replace(/'/g,"\\'");
+    html = html.replace(re, (m)=>`<span class="vocab" onclick="quickTip(this,'${wEsc}')" ondblclick="openVocab('${wEsc}')">${m}</span>`);
   });
   return html.replace(/\n/g,"<br>");
 }
 
+function quickTip(el, key){
+  const v = VOCAB[key];
+  if(!v) return;
+  if(window.event) window.event.stopPropagation();
+  const box = document.getElementById('quickTipBox');
+  box.innerHTML = `<b>${key.replace(/-/g,' ')}</b> <span class="qt-pos">${v.pos}</span><br>${v.zh}<br><span style="opacity:.55;font-size:.7rem;">（雙擊看完整解釋＋發音）</span>`;
+  const rect = el.getBoundingClientRect();
+  const left = Math.min(rect.left + window.scrollX, window.scrollX + window.innerWidth - 240);
+  box.style.left = left+'px';
+  box.style.top = (rect.bottom + window.scrollY + 6)+'px';
+  box.style.display = 'block';
+  clearTimeout(window._qtTimer);
+  window._qtTimer = setTimeout(()=>{ box.style.display='none'; }, 2800);
+}
+document.addEventListener('click', function(e){
+  if(e.target.classList && e.target.classList.contains('vocab')) return;
+  const box = document.getElementById('quickTipBox');
+  if(box) box.style.display='none';
+});
+
 function openVocab(key){
   const v = VOCAB[key];
   if(!v) return;
+  document.getElementById('quickTipBox').style.display='none';
   const wordText = key.replace(/-/g,' ');
   document.getElementById('vocabContent').innerHTML = `
     <h3>${wordText}</h3>
@@ -1024,6 +1274,7 @@ function closeVocab(){
 }
 document.getElementById('vocabOverlay').addEventListener('click', closeVocab);
 
+/* MC choice list used only by Part 7 (reading comprehension questions) */
 function choose(part, qid, idx, correctIdx, btnGroupId){
   const st = state[currentTest][part];
   if(st[qid] !== undefined) return;
@@ -1038,6 +1289,23 @@ function choose(part, qid, idx, correctIdx, btnGroupId){
   if(exp) exp.style.display='block';
   updateScore(part);
 }
+
+/* inline fill-in-the-blank choice, used by Part 5 and Part 6 */
+function chooseInline(part, qid, idx, correctIdx, groupId, explainId){
+  const st = state[currentTest][part];
+  if(st[qid] !== undefined) return;
+  st[qid] = idx;
+  const group = document.getElementById(groupId);
+  [...group.children].forEach((btn,i)=>{
+    btn.classList.add('disabled');
+    if(i===correctIdx) btn.classList.add('correct');
+    else if(i===idx) btn.classList.add('wrong');
+  });
+  const exp = document.getElementById(explainId);
+  if(exp) exp.style.display='inline';
+  updateScore(part);
+}
+
 
 function updateScore(part){
   const el = document.getElementById('score-'+part);
@@ -1058,18 +1326,17 @@ function updateScore(part){
 function renderP5(){
   const data = TESTS[currentTest].P5;
   let h = `<div class="section-title">Part 5 － 單句填空<span class="score" id="score-p5">尚未作答</span></div>
-  <div class="directions">每題句子中缺少一個單字或片語，請從四個選項中選出最適合的答案。點擊選項後會立即顯示正確答案與簡要解析。</div>`;
+  <div class="directions">句子中缺少一個字，直接點選括號中的選項——答對會打勾變綠色，答錯會打叉變紅色並顯示正確答案，馬上就知道文法對不對。</div>`;
   data.forEach(q=>{
-    const gid = currentTest+'p5g'+q.n;
+    const gid = currentTest+'p5c'+q.n;
+    const eid = currentTest+'p5e'+q.n;
     const speakIdx = registerSpeak(q.s.replace('___', q.c[q.a]));
+    const parts = q.s.split('___');
+    const choicesHtml = q.c.map((c,i)=>`<button class="inline-choice" onclick="chooseInline('p5',${q.n},${i},${q.a},'${gid}','${eid}')">${c}</button>`).join('');
     h += `<div class="card">
-      <div class="sentence"><span class="qnum">${q.n}.</span>${highlight(q.s.replace('___','_____'))}
+      <div class="sentence"><sup class="qnum-mini">${q.n}</sup>${highlight(parts[0])}<span class="inline-choices" id="${gid}">${choicesHtml}</span><span class="inline-explain" id="${eid}">💡 ${q.exp}</span>${highlight(parts[1])}
         <button class="qspeak" onclick="speakStored(${speakIdx},'slow',this)">🐢</button><button class="qspeak" onclick="speakStored(${speakIdx},'normal',this)">🐇</button>
       </div>
-      <div class="choices" id="${gid}">
-        ${q.c.map((c,i)=>`<button class="choice-btn" onclick="choose('p5',${q.n},${i},${q.a},'${gid}')">(${String.fromCharCode(65+i)}) ${c}</button>`).join('')}
-      </div>
-      <div class="explain">💡 ${q.exp}</div>
     </div>`;
   });
   return h;
@@ -1078,34 +1345,35 @@ function renderP5(){
 function renderP6(){
   const data = TESTS[currentTest].P6;
   let h = `<div class="section-title">Part 6 － 短文填空<span class="score" id="score-p6">尚未作答</span></div>
-  <div class="directions">閱讀短文，文中有四處空格，請選出最適合的答案。可點選文章中橘色底線的單字查看解釋，或按下方按鈕顯示整段中文翻譯。</div>`;
+  <div class="directions">文章中有四處空格，直接點選括號中的選項作答——答對打勾、答錯打叉並顯示正解。可點單字看快速解釋（點兩下看完整解釋＋發音），或用下方按鈕顯示中文翻譯。</div>`;
   data.forEach(t=>{
-    let text = t.text;
-    const blankSpans = {};
-    t.blanks.forEach(b=>{ blankSpans[b.n]=`<span class="blank-tag">${b.n}</span>`; });
-    text = text.replace(/\{\{(\d+)\}\}/g, (m,n)=>blankSpans[n]);
-    const speakText6 = t.text.replace(/\{\{\d+\}\}/g, (m,n)=>t.blanks.find(b=>('{{'+b.n+'}}')===m) ? t.blanks.find(b=>('{{'+b.n+'}}')===m).c[t.blanks.find(b=>('{{'+b.n+'}}')===m).a] : 'blank');
+    const segments = t.text.split(/(\{\{\d+\}\})/g);
+    let passageHtml = '';
+    segments.forEach(seg=>{
+      const m = seg.match(/^\{\{(\d+)\}\}$/);
+      if(m){
+        const n = parseInt(m[1]);
+        const b = t.blanks.find(bb=>bb.n===n);
+        const gid = currentTest+'p6c'+n;
+        const eid = currentTest+'p6e'+n;
+        const choicesHtml = b.c.map((c,i)=>`<button class="inline-choice" onclick="chooseInline('p6',${n},${i},${b.a},'${gid}','${eid}')">${c}</button>`).join('');
+        passageHtml += `<sup class="qnum-mini">${n}</sup><span class="inline-choices" id="${gid}">${choicesHtml}</span><span class="inline-explain" id="${eid}">💡 ${b.exp}</span>`;
+      } else {
+        passageHtml += highlight(seg);
+      }
+    });
+    const speakText6 = t.text.replace(/\{\{(\d+)\}\}/g, (m,n)=>{ const b=t.blanks.find(bb=>bb.n===parseInt(n)); return b ? b.c[b.a] : ''; });
     const speakIdx6 = registerSpeak(speakText6);
     h += `<div class="passage-box">
       <div class="passage-title">Questions ${t.range} · ${t.title}
         <button class="passage-speak" onclick="speakStored(${speakIdx6},'slow',this)">🐢 慢速</button><button class="passage-speak" onclick="speakStored(${speakIdx6},'normal',this)">🐇 連音</button>
       </div>
-      <div class="passage-text">${highlight(text)}</div>
+      <div class="passage-text">${passageHtml}</div>
     </div>
     <div class="toolbar">
       <button class="tbtn" onclick="toggleZh('${currentTest}p6zh${t.id}')">顯示 / 隱藏中文翻譯</button>
     </div>
     <div class="zh-block" id="${currentTest}p6zh${t.id}">${t.zh}</div>`;
-    t.blanks.forEach(b=>{
-      const gid = currentTest+'p6g'+b.n;
-      h += `<div class="card sub-q">
-        <div class="sentence"><span class="qnum">${b.n}.</span></div>
-        <div class="choices" id="${gid}">
-          ${b.c.map((c,i)=>`<button class="choice-btn" onclick="choose('p6',${b.n},${i},${b.a},'${gid}')">(${String.fromCharCode(65+i)}) ${c}</button>`).join('')}
-        </div>
-        <div class="explain">💡 ${b.exp}</div>
-      </div>`;
-    });
   });
   return h;
 }
@@ -1165,6 +1433,8 @@ function toggleZh(id){
 const renderers = { p5:renderP5, p6:renderP6, p7:renderP7 };
 
 function renderMain(){
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  ttsState = { btn:null, paused:false };
   if(currentTest==='patterns'){
     document.getElementById('main').innerHTML = renderPatterns();
     document.getElementById('partTabs').style.display='none';
